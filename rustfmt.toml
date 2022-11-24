@@ -1,249 +1,39 @@
-<!DOCTYPE html>
-<html class="devise-layout-html">
-<head prefix="og: http://ogp.me/ns#">
-<meta charset="utf-8">
-<title>登录 · 极狐GitLab</title>
-<link rel="preload" href="/assets/application_utilities-686bf3f252d3b3c33be50cc4ff2db7d9f59718b2753259ebef11b9b77010c467.css" as="style" type="text/css" nonce="wRYraWk+HF7XJR5mxSe9Kw==">
-<link rel="preload" href="/assets/application-7fe3ba71dd6ea79aea052d6d011eedd5955d52c23ec8a27f6e920aacaf6c218d.css" as="style" type="text/css" nonce="wRYraWk+HF7XJR5mxSe9Kw==">
-<link rel="preload" href="/assets/highlight/themes/white-0d509f0e705f116557b22b869a80c791e19004c79567f40b1456a9e20ee8f612.css" as="style" type="text/css" nonce="wRYraWk+HF7XJR5mxSe9Kw==">
-<link crossorigin="" href="https://https://jhposthog.gitlab.cn" rel="preconnect">
+# Run rustfmt with this config (it should be picked up automatically).
+# version = "Two"
+use_small_heuristics = "Max"
+merge_derives = false
 
-<meta content="IE=edge" http-equiv="X-UA-Compatible">
+# by default we ignore everything in the repository
+# tidy only checks files which are not ignored, each entry follows gitignore style
+# ignore = [
+#     "/build/",
+#     "/*-build/",
+#     "/build-*/",
+#     "/vendor/",
 
+#     # tests for now are not formatted, as they are sometimes pretty-printing constrained
+#     # (and generally rustfmt can move around comments in UI-testing incompatible ways)
+#     "src/test",
 
-<link rel="shortcut icon" type="image/png" href="/assets/favicon-yellow-018213ceb87b472388095d0264be5b4319ef47471dacea03c83ecc233ced2fd5.png" id="favicon" data-original-href="/assets/favicon-yellow-018213ceb87b472388095d0264be5b4319ef47471dacea03c83ecc233ced2fd5.png" />
-<style>
-@keyframes blinking-dot{0%{opacity:1}25%{opacity:0.4}75%{opacity:0.4}100%{opacity:1}}@keyframes blinking-scroll-button{0%{opacity:0.2}50%{opacity:1}100%{opacity:0.2}}@keyframes gl-spinner-rotate{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}body.ui-indigo{--gl-theme-accent: #6666c4}body.ui-indigo .navbar-gitlab{background-color:#292961}body.ui-indigo .navbar-gitlab .navbar-collapse{color:#d1d1f0}body.ui-indigo .navbar-gitlab .container-fluid .navbar-toggler{border-left:1px solid #6868b9;color:#d1d1f0}body.ui-indigo .navbar-gitlab .navbar-sub-nav>li>a:hover,body.ui-indigo .navbar-gitlab .navbar-sub-nav>li>a:focus,body.ui-indigo .navbar-gitlab .navbar-sub-nav>li>button:hover,body.ui-indigo .navbar-gitlab .navbar-sub-nav>li>button:focus,body.ui-indigo .navbar-gitlab .navbar-nav>li>a:hover,body.ui-indigo .navbar-gitlab .navbar-nav>li>a:focus,body.ui-indigo .navbar-gitlab .navbar-nav>li>button:hover,body.ui-indigo .navbar-gitlab .navbar-nav>li>button:focus{background-color:rgba(209,209,240,0.2)}body.ui-indigo .navbar-gitlab .navbar-sub-nav>li.active>a,body.ui-indigo .navbar-gitlab .navbar-sub-nav>li.active>button,body.ui-indigo .navbar-gitlab .navbar-sub-nav>li.dropdown.show>a,body.ui-indigo .navbar-gitlab .navbar-sub-nav>li.dropdown.show>button,body.ui-indigo .navbar-gitlab .navbar-nav>li.active>a,body.ui-indigo .navbar-gitlab .navbar-nav>li.active>button,body.ui-indigo .navbar-gitlab .navbar-nav>li.dropdown.show>a,body.ui-indigo .navbar-gitlab .navbar-nav>li.dropdown.show>button{color:#292961;background-color:#fff}body.ui-indigo .navbar-gitlab .navbar-sub-nav>li.line-separator,body.ui-indigo .navbar-gitlab .navbar-nav>li.line-separator{border-left:1px solid rgba(209,209,240,0.2)}body.ui-indigo .navbar-gitlab .navbar-sub-nav{color:#d1d1f0}body.ui-indigo .navbar-gitlab .nav>li{color:#d1d1f0}body.ui-indigo .navbar-gitlab .nav>li.header-search-new{color:#303030}body.ui-indigo .navbar-gitlab .nav>li>a .notification-dot{border:2px solid #292961}body.ui-indigo .navbar-gitlab .nav>li>a.header-help-dropdown-toggle .notification-dot{background-color:#d1d1f0}body.ui-indigo .navbar-gitlab .nav>li>a.header-user-dropdown-toggle .header-user-avatar{border-color:#d1d1f0}@media (min-width: 576px){body.ui-indigo .navbar-gitlab .nav>li>a:hover,body.ui-indigo .navbar-gitlab .nav>li>a:focus{background-color:rgba(209,209,240,0.2)}}body.ui-indigo .navbar-gitlab .nav>li>a:hover svg,body.ui-indigo .navbar-gitlab .nav>li>a:focus svg{fill:currentColor}body.ui-indigo .navbar-gitlab .nav>li>a:hover .notification-dot,body.ui-indigo .navbar-gitlab .nav>li>a:focus .notification-dot{will-change:border-color, background-color;border-color:#4a4a82}body.ui-indigo .navbar-gitlab .nav>li>a.header-help-dropdown-toggle:hover .notification-dot,body.ui-indigo .navbar-gitlab .nav>li>a.header-help-dropdown-toggle:focus .notification-dot{background-color:#fff}body.ui-indigo .navbar-gitlab .nav>li.active>a,body.ui-indigo .navbar-gitlab .nav>li.dropdown.show>a{color:#292961;background-color:#fff}body.ui-indigo .navbar-gitlab .nav>li.active>a:hover svg,body.ui-indigo .navbar-gitlab .nav>li.dropdown.show>a:hover svg{fill:#292961}body.ui-indigo .navbar-gitlab .nav>li.active>a .notification-dot,body.ui-indigo .navbar-gitlab .nav>li.dropdown.show>a .notification-dot{border-color:#fff}body.ui-indigo .navbar-gitlab .nav>li.active>a.header-help-dropdown-toggle .notification-dot,body.ui-indigo .navbar-gitlab .nav>li.dropdown.show>a.header-help-dropdown-toggle .notification-dot{background-color:#292961}body.ui-indigo .navbar-gitlab .nav>li .impersonated-user svg,body.ui-indigo .navbar-gitlab .nav>li .impersonated-user:hover svg{fill:#292961}body.ui-indigo .navbar .title>a:hover,body.ui-indigo .navbar .title>a:focus{background-color:rgba(209,209,240,0.2)}body.ui-indigo .header-search{background-color:rgba(209,209,240,0.2) !important;border-radius:4px}body.ui-indigo .header-search:hover{background-color:rgba(209,209,240,0.3) !important}body.ui-indigo .header-search svg.gl-search-box-by-type-search-icon{color:rgba(209,209,240,0.8)}body.ui-indigo .header-search input{background-color:transparent;color:rgba(209,209,240,0.8);box-shadow:inset 0 0 0 1px rgba(209,209,240,0.4)}body.ui-indigo .header-search input::placeholder{color:rgba(209,209,240,0.8)}body.ui-indigo .header-search input:focus::placeholder,body.ui-indigo .header-search input:active::placeholder{color:#868686}body.ui-indigo .header-search .keyboard-shortcut-helper{color:#d1d1f0;background-color:rgba(209,209,240,0.2)}body.ui-indigo .search form{background-color:rgba(209,209,240,0.2)}body.ui-indigo .search form:hover{background-color:rgba(209,209,240,0.3)}body.ui-indigo .search .search-input::placeholder{color:rgba(209,209,240,0.8)}body.ui-indigo .search .search-input-wrap .search-icon,body.ui-indigo .search .search-input-wrap .clear-icon{fill:rgba(209,209,240,0.8)}body.ui-indigo .search.search-active form{background-color:#fff}body.ui-indigo .search.search-active .search-input-wrap .search-icon{fill:rgba(209,209,240,0.8)}body.ui-indigo .search-sidebar .nav-link.active,body.ui-indigo .search-sidebar .nav-link:hover{background-color:rgba(240,240,240,0.8);color:#303030}body.ui-indigo .nav-sidebar li.active>a{color:#303030}body.ui-indigo .nav-sidebar .fly-out-top-item a,body.ui-indigo .nav-sidebar .fly-out-top-item a:hover,body.ui-indigo .nav-sidebar .fly-out-top-item.active a,body.ui-indigo .nav-sidebar .fly-out-top-item .fly-out-top-item-container{background-color:var(--gray-100, #f0f0f0);color:var(--gray-900, #303030)}body.ui-indigo .branch-header-title{color:#4b4ba3}body.ui-indigo .ide-sidebar-link.active{color:#4b4ba3}body.ui-indigo .ide-sidebar-link.active.is-right{box-shadow:inset -3px 0 #4b4ba3}
-
-*,*::before,*::after{box-sizing:border-box}html{font-family:sans-serif;line-height:1.15}header{display:block}body{margin:0;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, Cantarell, "Helvetica Neue", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-size:1rem;font-weight:400;line-height:1.5;color:#303030;text-align:left;background-color:#fff}hr{box-sizing:content-box;height:0;overflow:visible}h1,h3{margin-top:0;margin-bottom:0.25rem}p{margin-top:0;margin-bottom:1rem}a{color:#1f75cb;text-decoration:none;background-color:transparent}a:not([href]):not([class]){color:inherit;text-decoration:none}img{vertical-align:middle;border-style:none}svg{overflow:hidden;vertical-align:middle}label{display:inline-block;margin-bottom:0.5rem}button{border-radius:0}input,button{margin:0;font-family:inherit;font-size:inherit;line-height:inherit}button,input{overflow:visible}button{text-transform:none}[role="button"]{cursor:pointer}button:not(:disabled),[type="button"]:not(:disabled),[type="submit"]:not(:disabled){cursor:pointer}button::-moz-focus-inner,[type="button"]::-moz-focus-inner,[type="submit"]::-moz-focus-inner{padding:0;border-style:none}input[type="checkbox"]{box-sizing:border-box;padding:0}fieldset{min-width:0;padding:0;margin:0;border:0}[hidden]{display:none !important}h1,h3{margin-bottom:0.25rem;font-weight:600;line-height:1.2;color:#303030}h1{font-size:2.1875rem}h3{font-size:1.53125rem}hr{margin-top:0.5rem;margin-bottom:0.5rem;border:0;border-top:1px solid rgba(0,0,0,0.1)}.container{width:100%;padding-right:15px;padding-left:15px;margin-right:auto;margin-left:auto}@media (min-width: 576px){.container{max-width:540px}}@media (min-width: 768px){.container{max-width:720px}}@media (min-width: 992px){.container{max-width:960px}}@media (min-width: 1200px){.container{max-width:1140px}}.row{display:flex;flex-wrap:wrap;margin-right:-15px;margin-left:-15px}.col-md-6,.col-sm-12{position:relative;width:100%;padding-right:15px;padding-left:15px}.order-1{order:1}.order-12{order:12}@media (min-width: 576px){.col-sm-12{flex:0 0 100%;max-width:100%}.order-sm-1{order:1}.order-sm-12{order:12}}@media (min-width: 768px){.col-md-6{flex:0 0 50%;max-width:50%}}.form-control{display:block;width:100%;height:34px;padding:0.375rem 0.75rem;font-size:0.875rem;font-weight:400;line-height:1.5;color:#303030;background-color:#fff;background-clip:padding-box;border:1px solid #868686;border-radius:0.25rem}.form-control:-moz-focusring{color:transparent;text-shadow:0 0 0 #303030}.form-control::placeholder{color:#5e5e5e;opacity:1}.form-control:disabled{background-color:#fafafa;opacity:1}.form-group{margin-bottom:1rem}.btn{display:inline-block;font-weight:400;color:#303030;text-align:center;vertical-align:middle;-webkit-user-select:none;user-select:none;background-color:transparent;border:1px solid transparent;padding:0.375rem 0.75rem;font-size:1rem;line-height:20px;border-radius:0.25rem}.btn:disabled{opacity:0.65}.btn:not(:disabled):not(.disabled){cursor:pointer}fieldset:disabled a.btn{pointer-events:none}.btn-block{display:block;width:100%}.btn-block+.btn-block{margin-top:0.5rem}input.btn-block[type="submit"],input.btn-block[type="button"]{width:100%}.custom-control{position:relative;z-index:1;display:block;min-height:1.5rem;padding-left:1.5rem;-webkit-print-color-adjust:exact;color-adjust:exact}.custom-control-input{position:absolute;left:0;z-index:-1;width:1rem;height:1.25rem;opacity:0}.custom-control-input:checked~.custom-control-label::before{color:#fff;border-color:#007bff;background-color:#007bff}.custom-control-input:not(:disabled):active~.custom-control-label::before{color:#fff;background-color:#b3d7ff;border-color:#b3d7ff}.custom-control-input:disabled~.custom-control-label{color:#5e5e5e}.custom-control-input:disabled~.custom-control-label::before{background-color:#fafafa}.custom-control-label{position:relative;margin-bottom:0;vertical-align:top}.custom-control-label::before{position:absolute;top:0.25rem;left:-1.5rem;display:block;width:1rem;height:1rem;pointer-events:none;content:"";background-color:#fff;border:#666 solid 1px}.custom-control-label::after{position:absolute;top:0.25rem;left:-1.5rem;display:block;width:1rem;height:1rem;content:"";background:no-repeat 50% / 50% 50%}.custom-checkbox .custom-control-label::before{border-radius:0.25rem}.custom-checkbox .custom-control-input:checked~.custom-control-label::after{background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3e%3cpath fill='%23fff' d='M6.564.75l-3.59 3.612-1.538-1.55L0 4.26l2.974 2.99L8 2.193z'/%3e%3c/svg%3e")}.custom-checkbox .custom-control-input:indeterminate~.custom-control-label::before{border-color:#007bff;background-color:#007bff}.custom-checkbox .custom-control-input:indeterminate~.custom-control-label::after{background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3e%3cpath stroke='%23fff' d='M0 2h4'/%3e%3c/svg%3e")}.custom-checkbox .custom-control-input:disabled:checked~.custom-control-label::before{background-color:rgba(0,123,255,0.5)}.custom-checkbox .custom-control-input:disabled:indeterminate~.custom-control-label::before{background-color:rgba(0,123,255,0.5)}.tab-content>.tab-pane{display:none}.tab-content>.active{display:block}.navbar{position:relative;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;padding:0.25rem 0.5rem}.navbar .container{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between}.clearfix::after{display:block;clear:both;content:""}.fixed-top{position:fixed;top:0;right:0;left:0;z-index:1030}.mt-3{margin-top:1rem !important}.mb-3{margin-bottom:1rem !important}.text-nowrap{white-space:nowrap !important}.font-weight-normal{font-weight:400 !important}.gl-form-input,.gl-form-input.form-control{background-color:#fff;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, Cantarell, "Helvetica Neue", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-size:0.875rem;line-height:1rem;padding-top:0.5rem;padding-bottom:0.5rem;padding-left:0.75rem;padding-right:0.75rem;height:auto;color:#303030;box-shadow:inset 0 0 0 1px #868686;border-style:none;-webkit-appearance:none;appearance:none;-moz-appearance:none}.gl-form-input:disabled,.gl-form-input:not(.form-control-plaintext):not([type="color"]):read-only,.gl-form-input.form-control:disabled,.gl-form-input.form-control:not(.form-control-plaintext):not([type="color"]):read-only{background-color:#f5f5f5;box-shadow:inset 0 0 0 1px #dbdbdb}.gl-form-input:disabled,.gl-form-input.form-control:disabled{cursor:not-allowed;color:#666}.gl-form-input::placeholder,.gl-form-input.form-control::placeholder{color:#868686}.gl-form-checkbox{font-size:0.875rem;line-height:1rem;color:#303030}.gl-form-checkbox .custom-control-input:disabled,.gl-form-checkbox .custom-control-input:disabled~.custom-control-label{cursor:not-allowed;color:#868686}.gl-form-checkbox.custom-control .custom-control-input~.custom-control-label{cursor:pointer}.gl-form-checkbox.custom-control .custom-control-input~.custom-control-label::before,.gl-form-checkbox.custom-control .custom-control-input~.custom-control-label::after{top:0}.gl-form-checkbox.custom-control .custom-control-input~.custom-control-label::before{background-color:#fff;border-color:#868686}.gl-form-checkbox.custom-control .custom-control-input:checked~.custom-control-label::before{background-color:#1f75cb;border-color:#1f75cb}.gl-form-checkbox.custom-control .custom-control-input[type="checkbox"]:checked~.custom-control-label::after,.gl-form-checkbox.custom-control .custom-control-input[type="checkbox"]:indeterminate~.custom-control-label::after{background:none;background-color:#fff;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center center;mask-position:center center}.gl-form-checkbox.custom-control .custom-control-input[type="checkbox"]:checked~.custom-control-label::after{-webkit-mask-image:url('data:image/svg+xml,%3Csvg width="8" height="7" viewBox="0 0 8 7" fill="none" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M1 3.05299L2.99123 5L7 1" stroke="white" stroke-width="2"/%3E%3C/svg%3E%0A');mask-image:url('data:image/svg+xml,%3Csvg width="8" height="7" viewBox="0 0 8 7" fill="none" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M1 3.05299L2.99123 5L7 1" stroke="white" stroke-width="2"/%3E%3C/svg%3E%0A')}.gl-form-checkbox.custom-control .custom-control-input[type="checkbox"]:indeterminate~.custom-control-label::after{-webkit-mask-image:url('data:image/svg+xml,%3Csvg width="8" height="2" viewBox="0 0 8 2" fill="none" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M0 1L8 1" stroke="white" stroke-width="2"/%3E%3C/svg%3E%0A');mask-image:url('data:image/svg+xml,%3Csvg width="8" height="2" viewBox="0 0 8 2" fill="none" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M0 1L8 1" stroke="white" stroke-width="2"/%3E%3C/svg%3E%0A')}.gl-form-checkbox.custom-control.custom-checkbox .custom-control-input:indeterminate~.custom-control-label::before{background-color:#1f75cb;border-color:#1f75cb}.gl-form-checkbox.custom-control .custom-control-input:disabled~.custom-control-label{cursor:not-allowed}.gl-form-checkbox.custom-control .custom-control-input:disabled~.custom-control-label::before{background-color:#f0f0f0;border-color:#dbdbdb;pointer-events:auto}.gl-form-checkbox.custom-control .custom-control-input:checked:disabled~.custom-control-label::before,.gl-form-checkbox.custom-control .custom-control-input[type="checkbox"]:indeterminate:disabled~.custom-control-label::before{background-color:#dbdbdb;border-color:#dbdbdb}.gl-form-checkbox.custom-control .custom-control-input:checked:disabled~.custom-control-label::after,.gl-form-checkbox.custom-control .custom-control-input[type="checkbox"]:indeterminate:disabled~.custom-control-label::after{background-color:#5e5e5e}.gl-button{display:inline-flex}.gl-button:not(.btn-link):active{text-decoration:none}.gl-button.gl-button,.gl-button.gl-button.btn-block{border-width:0;padding-top:0.5rem;padding-bottom:0.5rem;padding-left:0.75rem;padding-right:0.75rem;background-color:transparent;line-height:1rem;color:#303030;fill:currentColor;box-shadow:inset 0 0 0 1px #bfbfbf;justify-content:center;align-items:center;font-size:0.875rem;border-radius:0.25rem}.gl-button.gl-button .gl-button-text,.gl-button.gl-button.btn-block .gl-button-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-top:1px;padding-bottom:1px;margin-top:-1px;margin-bottom:-1px}.gl-button.gl-button .gl-button-icon,.gl-button.gl-button.btn-block .gl-button-icon{height:1rem;width:1rem;flex-shrink:0;margin-right:0.25rem;top:auto}.gl-button.gl-button.btn-default,.gl-button.gl-button.btn-block.btn-default{background-color:#fff}.gl-button.gl-button.btn-default:active,.gl-button.gl-button.btn-default.active,.gl-button.gl-button.btn-block.btn-default:active,.gl-button.gl-button.btn-block.btn-default.active{box-shadow:inset 0 0 0 1px #5e5e5e, 0 0 0 1px #fff, 0 0 0 3px #428fdc;outline:none;background-color:#dbdbdb}.gl-button.gl-button.btn-confirm,.gl-button.gl-button.btn-block.btn-confirm{color:#fff}.gl-button.gl-button.btn-confirm,.gl-button.gl-button.btn-block.btn-confirm{background-color:#1f75cb;box-shadow:inset 0 0 0 1px #1068bf}.gl-button.gl-button.btn-confirm:active,.gl-button.gl-button.btn-confirm.active,.gl-button.gl-button.btn-block.btn-confirm:active,.gl-button.gl-button.btn-block.btn-confirm.active{box-shadow:inset 0 0 0 1px #033464, 0 0 0 1px #fff, 0 0 0 3px #428fdc;outline:none;background-color:#0b5cad}body{font-size:0.875rem}button,html [type="button"],[type="submit"],[role="button"]{cursor:pointer}h1,h3{margin-top:20px;margin-bottom:10px}hr{overflow:hidden}svg{vertical-align:baseline}.form-control{font-size:0.875rem}.hidden{display:none !important;visibility:hidden !important}html{overflow-y:scroll}body.navless{background-color:#fff !important}.container{padding-top:0;z-index:5}.container .content{margin:0}@media (max-width: 575.98px){.container .content{margin-top:20px}}.navless-container{margin-top:var(--header-height, 48px);padding-top:32px}.btn{border-radius:4px;font-size:0.875rem;font-weight:400;padding:6px 10px;background-color:#fff;border-color:#dbdbdb;color:#303030;color:#303030;white-space:nowrap}.btn:active{background-color:#f0f0f0;box-shadow:none}.btn:active,.btn.active{background-color:#eaeaea;border-color:#e3e3e3;color:#303030}.btn svg{height:15px;width:15px}.btn svg:not(:last-child){margin-right:5px}.btn-block{width:100%;margin:0;margin-bottom:1rem}.btn-block.btn{padding:6px 0}.tab-content{overflow:visible}@media (max-width: 767.98px){.tab-content{isolation:isolate}}hr{margin:1.5rem 0;border-top:1px solid #eee}.footer-links{margin-bottom:20px}.footer-links a{margin-right:15px}.flash-container{margin:0;margin-bottom:16px;font-size:14px;position:relative;z-index:1}.flash-container.sticky{position:sticky;top:48px;z-index:251}.flash-container.flash-container-page{margin-bottom:0}.flash-container:empty{margin:0}input{border-radius:0.25rem;color:#303030;background-color:#fff}label{font-weight:600}label.custom-control-label{font-weight:400}label.label-bold{font-weight:600}.form-control{border-radius:4px;padding:6px 10px}.form-control::placeholder{color:#868686}.gl-show-field-errors .form-control:not(textarea){height:34px}.navbar-empty{justify-content:center;height:var(--header-height, 48px);background:#fff;border-bottom:1px solid #dbdbdb}.navbar-empty .tanuki-logo,.navbar-empty .brand-header-logo{max-height:100%}.tanuki-logo .tanuki{fill:#e24329}.tanuki-logo .left-cheek,.tanuki-logo .right-cheek{fill:#fc6d26}.tanuki-logo .chin{fill:#fca326}input::-moz-placeholder{color:#868686;opacity:1}input::-ms-input-placeholder{color:#868686}input:-ms-input-placeholder{color:#868686}svg{fill:currentColor}.login-page .container{max-width:960px}.login-page .navbar-gitlab .container{max-width:none}.login-page .flash-container{margin-bottom:16px;position:relative;top:8px}.login-page .brand-holder{font-size:18px;line-height:1.5}.login-page .brand-holder p{font-size:16px;color:#888}.login-page .brand-holder h3{font-size:22px}.login-page .brand-holder img{max-width:100%;margin-bottom:30px}.login-page .brand-holder a{font-weight:600}.login-page p{font-size:13px}.login-page .signin-text p{margin-bottom:0;line-height:1.5}.login-page .borderless .login-box,.login-page .borderless .omniauth-container{box-shadow:none}.login-page .borderless .g-recaptcha>div{margin-left:auto;margin-right:auto}.login-page .login-box,.login-page .omniauth-container{box-shadow:0 0 0 1px #dbdbdb;border-radius:0.25rem}.login-page .login-box .login-heading h3,.login-page .omniauth-container .login-heading h3{font-weight:400;line-height:1.5;margin:0 0 10px}.login-page .login-box .login-footer,.login-page .omniauth-container .login-footer{margin-top:10px}.login-page .login-box .login-footer p:last-child,.login-page .omniauth-container .login-footer p:last-child{margin-bottom:0}.login-page .login-box a.forgot,.login-page .omniauth-container a.forgot{float:right;padding-top:6px}.login-page .login-box .nav .active a,.login-page .omniauth-container .nav .active a{background:transparent}.login-page .login-box .login-body,.login-page .omniauth-container .login-body{font-size:13px}.login-page .login-box .login-body input+p,.login-page .login-box .login-body input~p.field-validation,.login-page .omniauth-container .login-body input+p,.login-page .omniauth-container .login-body input~p.field-validation{margin-top:5px}.login-page .login-box .login-body .username .validation-success,.login-page .omniauth-container .login-body .username .validation-success{color:#217645}.login-page .login-box .login-body .username .validation-error,.login-page .omniauth-container .login-body .username .validation-error{color:#dd2b0e}.login-page .omniauth-container{border-radius:0.25rem;font-size:13px}.login-page .omniauth-container p{margin:0}.login-page .omniauth-container form{padding:0;border:0;background:none}.login-page .new-session-tabs{display:flex;box-shadow:0 0 0 1px #dbdbdb;border-top-right-radius:4px;border-top-left-radius:4px}.login-page .new-session-tabs.nav-links-unboxed{border-color:transparent;box-shadow:none}.login-page .new-session-tabs.nav-links-unboxed .nav-item{border-left:0;border-right:0;border-bottom:1px solid #dbdbdb;background-color:transparent}.login-page .new-session-tabs.custom-provider-tabs{flex-wrap:wrap}.login-page .new-session-tabs.custom-provider-tabs li{min-width:85px;flex-basis:auto}.login-page .new-session-tabs.custom-provider-tabs li:nth-child(n + 5){border-top:1px solid #dbdbdb}.login-page .new-session-tabs.custom-provider-tabs a{font-size:16px}.login-page .new-session-tabs li{flex:1;text-align:center;border-left:1px solid #dbdbdb}.login-page .new-session-tabs li:first-of-type{border-left:0;border-top-left-radius:4px}.login-page .new-session-tabs li:last-of-type{border-top-right-radius:4px}.login-page .new-session-tabs li:not(.active){background-color:#fafafa}.login-page .new-session-tabs li a{width:100%;font-size:18px}.login-page .new-session-tabs li.active>a{cursor:default}.login-page .form-control:active,.login-page .form-control:focus{background-color:#fff}.login-page .submit-container{margin-top:16px}.login-page input[type="submit"]{margin-bottom:0;display:block;width:100%}.login-page .devise-errors h2{margin-top:0;font-size:14px;color:#ae1800}@media (max-width: 575.98px){.login-page .col-md-5.float-right{float:none !important;margin-bottom:45px}}.devise-layout-html{margin:0;padding:0;height:100%}.devise-layout-html body{height:calc(100% - 51px);margin:0;padding:0}.devise-layout-html body.navless{height:calc(100% - 11px)}.devise-layout-html body .page-wrap{min-height:100%;position:relative}.devise-layout-html body .footer-container,.devise-layout-html body hr.footer-fixed{position:absolute;bottom:0;left:0;right:0;height:40px;background:#fff}.devise-layout-html body .login-page-broadcast{margin-top:40px}.devise-layout-html body .navless-container{padding:0 15px 65px}.devise-layout-html body .flash-container{padding-bottom:65px}@media (max-width: 575.98px){.devise-layout-html body .flash-container{padding-bottom:0}}.gl-display-flex{display:flex}.gl-display-inline-block{display:inline-block}.gl-flex-wrap{flex-wrap:wrap}.gl-justify-content-center{justify-content:center}.gl-float-right{float:right}.gl-w-10{width:3.5rem}.gl-w-half{width:50%}.gl-w-90p{width:90%}.gl-w-full{width:100%}@media (max-width: 575.98px){.gl-xs-w-full{width:100%}}.gl-p-5{padding:1rem}.gl-px-5{padding-left:1rem;padding-right:1rem}.gl-pt-5{padding-top:1rem}.gl-mt-3{margin-top:0.5rem}.gl-mt-5{margin-top:1rem}.gl-mr-auto{margin-right:auto}.gl-mr-2{margin-right:0.25rem}.gl-mb-1{margin-bottom:0.125rem}.gl-mb-2{margin-bottom:0.25rem}.gl-mb-3{margin-bottom:0.5rem}.gl-ml-auto{margin-left:auto}.gl-ml-2{margin-left:0.25rem}@media (min-width: 576px){.gl-sm-mt-0{margin-top:0}}.gl-text-center{text-align:center}.gl-font-size-h2{font-size:1.1875rem}.gl-font-weight-normal{font-weight:400}.gl-font-weight-bold{font-weight:600}.cloak-startup,.content-wrapper>.alert-wrapper,#content-body,.modal-dialog{display:none}@keyframes blinking-dot{0%{opacity:1}25%{opacity:0.4}75%{opacity:0.4}100%{opacity:1}}@keyframes blinking-scroll-button{0%{opacity:0.2}50%{opacity:1}100%{opacity:0.2}}@keyframes gl-spinner-rotate{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}.gl-flex-fill-1{flex:1}.gl-mt-3{margin-top:0.5rem}.gl-ml-3{margin-left:0.5rem}.gl-flex-grow-1{flex-grow:1}.gl-align-items-flex-start{align-items:flex-start}.phone-input .form-group,.verification-code-input .form-group{margin-bottom:0}.phone-input p,.verification-code-input p{margin-bottom:0}.verification-code.form-group .js-verification-btn{min-width:120px;flex:1}.phone-form{padding:16px}@media (min-width: 768px){.phone-form.inline{display:flex}.phone-form.inline .phone,.phone-form.inline .verification-code{flex:none;margin-right:0.75rem;width:360px}}.login-page .omniauth-container.restyle-login-page form,.login-page .omniauth-container.restyle-login-page .js-oauth-login{flex-basis:calc(50% - 0.25rem)}
-
-</style>
-
-
-<link rel="stylesheet" media="print" href="/assets/application-7fe3ba71dd6ea79aea052d6d011eedd5955d52c23ec8a27f6e920aacaf6c218d.css" />
-<link rel="stylesheet" media="print" href="/assets/page_bundles/signin-74c17dca608713a535b0f40f96fb31280c2e57c0358c37a5854fdd39069fa9f4.css" />
-<link rel="stylesheet" media="print" href="/assets/application_utilities-686bf3f252d3b3c33be50cc4ff2db7d9f59718b2753259ebef11b9b77010c467.css" />
-
-
-<link rel="stylesheet" media="print" href="/assets/highlight/themes/white-0d509f0e705f116557b22b869a80c791e19004c79567f40b1456a9e20ee8f612.css" />
-<script nonce="yS4YuDt2RX0d2Slir9X+YA==">
-//<![CDATA[
-document.querySelectorAll('link[media="print"]').forEach(linkTag => {
-  linkTag.setAttribute('data-startupcss', 'loading');
-  const startupLinkLoadedEvent = new CustomEvent('CSSStartupLinkLoaded');
-  linkTag.addEventListener('load',function(){this.media='all';this.setAttribute('data-startupcss', 'loaded');document.dispatchEvent(startupLinkLoadedEvent);},{once: true});
-})
-
-//]]>
-</script>
-
-<script nonce="yS4YuDt2RX0d2Slir9X+YA==">
-//<![CDATA[
-window.gon={};gon.features={"webauthn":true,"arkoseLabsLoginChallenge":false};
-//]]>
-</script>
-<script src="/assets/locale/zh_CN/app-2b77b11851029981acbb5b5553ad66934bb31703259dca0717c10a0954255ac3.js" defer="defer" nonce="yS4YuDt2RX0d2Slir9X+YA=="></script>
-
-<script src="/assets/webpack/runtime.d96b6a89.bundle.js" defer="defer" nonce="yS4YuDt2RX0d2Slir9X+YA=="></script>
-<script src="/assets/webpack/main.5d7d6ae8.chunk.js" defer="defer" nonce="yS4YuDt2RX0d2Slir9X+YA=="></script>
-<script src="/assets/webpack/sentry.6e87cb71.chunk.js" defer="defer" nonce="yS4YuDt2RX0d2Slir9X+YA=="></script>
-
-
-
-
-
-<script src="/assets/webpack/commons-pages.admin.sessions-pages.groups.omniauth_callbacks-pages.ldap.omniauth_callbacks-pages.omn-8cc40fbb.63d2eb00.chunk.js" defer="defer" nonce="yS4YuDt2RX0d2Slir9X+YA=="></script>
-<script src="/assets/webpack/pages.sessions.new.4427cf18.chunk.js" defer="defer" nonce="yS4YuDt2RX0d2Slir9X+YA=="></script>
-
-<meta content="object" property="og:type">
-<meta content="极狐GitLab" property="og:site_name">
-<meta content="登录 · 极狐GitLab" property="og:title">
-<meta content="JihuLab.com" property="og:description">
-<meta content="https://jihulab.com/assets/twitter_card-67324091d206ba0e63f4810d745f0b886bedcaa9fa620763cfb90bf3fc9c05f2.jpg" property="og:image">
-<meta content="64" property="og:image:width">
-<meta content="64" property="og:image:height">
-<meta content="https://jihulab.com/users/sign_in" property="og:url">
-<meta content="summary" property="twitter:card">
-<meta content="登录 · 极狐GitLab" property="twitter:title">
-<meta content="JihuLab.com" property="twitter:description">
-<meta content="https://jihulab.com/assets/twitter_card-67324091d206ba0e63f4810d745f0b886bedcaa9fa620763cfb90bf3fc9c05f2.jpg" property="twitter:image">
-
-<meta content="JihuLab.com" name="description">
-<link href="/-/manifest.json" rel="manifest">
-<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
-<meta content="#292961" name="theme-color">
-<meta name="csrf-param" content="authenticity_token" />
-<meta name="csrf-token" content="P/BrrbQU58gqCxXZEYsHHJ8oZFZLm1puRihbuv0vQKPP/RqYrzcVbp9IHQkpcCz8zjkhhCQEXwn/M/hw578FpQ==" />
-<meta name="csp-nonce" content="yS4YuDt2RX0d2Slir9X+YA==" />
-<meta name="action-cable-url" content="/-/cable" />
-<link rel="apple-touch-icon" type="image/x-icon" href="/assets/apple-touch-icon-b049d4bc0dd9626f31db825d61880737befc7835982586d015bded10b4435460.png" />
-<link href="/search/opensearch.xml" rel="search" title="Search GitLab" type="application/opensearchdescription+xml">
-
-
-
-
-<!-- Tencent RUM -->
-<script src="https://cdn-go.cn/aegis/aegis-sdk/latest/aegis.min.js" type="text/javascript"></script>
-<script nonce="yS4YuDt2RX0d2Slir9X+YA==">
-//<![CDATA[
-;var aegis = new Aegis({
-    id: 'lYKjL8AgQDn7M6aqwe',
-    reportApiSpeed: true,
-    reportAssetSpeed: true,
-});
-window.addEventListener("unhandledrejection", function(err){
-  if(err.reason && err.reason.name === 'AbortError') {
-    err.preventDefault();
-  }
-});
-
-
-//]]>
-</script><!-- End Tencent Code -->
-<script nonce="yS4YuDt2RX0d2Slir9X+YA==">
-//<![CDATA[
-!function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
-
-//]]>
-</script>
-</head>
-
-<body class="login-page application navless ui-indigo gl-browser-generic gl-platform-other" data-page="sessions:new" data-qa-selector="login_page">
-
-<script nonce="yS4YuDt2RX0d2Slir9X+YA==">
-//<![CDATA[
-gl = window.gl || {};
-gl.client = {"isGeneric":true,"isOther":true};
-
-
-//]]>
-</script>
-<div class="page-wrap borderless">
-<div class="login-page-broadcast">
-
-
-</div>
-<div class="container navless-container">
-<div class="content">
-<div class="flash-container flash-container-page sticky" data-qa-selector="flash_container">
-</div>
-
-<div class="mt-3">
-<div class="col-sm-12 gl-text-center">
-<img alt="JihuLab.com" class="gl-w-15 lazy" data-src="/assets/logo-cb4bd87a021ad08fa0b5a04a6ea54d42771a1c6bc5fd67cbd2fef454accc8e25.svg" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" />
-<h1 class="mb-3 gl-font-size-h2">
-JihuLab.com
-</h1>
-
-</div>
-</div>
-<div class="mb-3">
-<div class="gl-w-half gl-xs-w-full gl-ml-auto gl-mr-auto bar">
-
-<div id="signin-container">
-<div class="tab-content">
-<div class="login-box tab-pane active" id="login-pane" role="tabpanel">
-<div class="login-body">
-<form class="new_user gl-show-field-errors js-arkose-labs-form" id="new_user" aria-live="assertive" data-testid="sign-in-form" action="/users/sign_in" accept-charset="UTF-8" method="post"><input type="hidden" name="authenticity_token" value="Iev5FHG0BFweSPR9EtmRq6LjbxZHTJtinTiOB26ixDHR5oghapf2+qsL/K0qIrpL8/IqxCjTngUkIy3NdDKBNw==" autocomplete="off" /><div class="form-group gl-px-5 gl-pt-5">
-<label for="user_login" class="label-bold">用户名/邮箱/手机号</label>
-
-<input class="form-control gl-form-input top js-username-field" autofocus="autofocus" autocapitalize="off" autocorrect="off" required="required" title="该字段是必填字段。" data-qa-selector="login_field" data-testid="username-field" type="text" name="user[login]" id="user_login" />
-</div>
-<div class="form-group gl-px-5">
-<label class="label-bold gl-mb-1" for="user_password">密码</label>
-<input class="form-control gl-form-input bottom" autocomplete="current-password" required="required" title="该字段是必填字段。" data-qa-selector="password_field" data-testid="password-field" type="password" name="user[password]" id="user_password" />
-</div>
-<div class="gl-px-5">
-<div class="gl-display-inline-block">
-<div class="gl-form-checkbox custom-control custom-checkbox">
-<input name="user[remember_me]" type="hidden" value="0" autocomplete="off" /><input class="custom-control-input" type="checkbox" value="1" name="user[remember_me]" id="user_remember_me" />
-<label class="custom-control-label" for="user_remember_me"><span>记住账号</span></label>
-</div>
-
-</div>
-<div class="gl-float-right">
-<a href="/users/password/new">忘记密码？</a>
-</div>
-</div>
-<div></div>
-<div class="submit-container move-submit-down gl-px-5">
-<button name="button" type="submit" class="gl-button btn btn-block btn-confirm js-sign-in-button" data-qa-selector="sign_in_button" data-testid="sign-in-button">登录</button>
-</div>
-</form>
-</div>
-</div>
-
-</div>
-<p class="gl-px-5">
-登入即代表您同意并接受<a href='/-/users/terms' target='_blank' rel='noreferrer noopener'>极狐GitLab服务条款和账号规范</a>。如使用企业邮箱订阅本服务，则您同意极狐将该账户数据提供给对应企业而无需另行对您进行通知或承担责任。
-</p>
-<p class="gl-mt-3 gl-text-center">
-还没有账户？
-<a data-qa-selector="register_link" href="/users/sign_up">立即注册</a>
-</p>
-<div class="omniauth-provider-divider gl-display-flex gl-align-items-center">
-或
-</div>
-<div class="clearfix">
-<div class="omniauth-container gl-mt-5 gl-p-5 gl-text-center gl-w-90p gl-ml-auto gl-mr-auto restyle-login-page">
-<label class="gl-font-weight-normal gl-mb-5">
-登录方式
-</label>
-<div class="gl-display-flex gl-flex-wrap gl-justify-content-center gl-gap-3">
-<form class="gl-mb-3 gl-w-full" method="post" action="/users/auth/github"><button id="oauth-login-github" class="btn gl-button btn-default gl-w-full gl-mb-2 js-oauth-login  " type="submit"><img alt="GitHub" title="Sign in with GitHub" class="gl-button-icon lazy" data-src="/assets/auth_buttons/github_64-84041cd0ea392220da96f0fb9b9473c08485c4924b98c776be1bd33b0daab8c0.png" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" />
-<span class="gl-button-text">
-GitHub
-</span>
-</button><input type="hidden" name="authenticity_token" value="Cpahmsdv555N10jL6D57mh1bOX2wp5KW4G337AvsnWP6m9Cv3EwVOPiUQBvQxVB6TEp8r984l/FZdlQmEXzYZQ==" autocomplete="off" /></form><form class="gl-mb-3 gl-w-full" method="post" action="/users/auth/gitlab"><button id="oauth-login-gitlab" class="btn gl-button btn-default gl-w-full gl-mb-2 js-oauth-login  " type="submit"><img alt="GitLab.com" title="Sign in with GitLab.com" class="gl-button-icon lazy" data-src="/assets/auth_buttons/gitlab_64-2957169c8ef64c58616a1ac3f4fc626e8a35ce4eb3ed31bb0d873712f2a041a0.png" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" />
-<span class="gl-button-text">
-GitLab.com
-</span>
-</button><input type="hidden" name="authenticity_token" value="CAJgIzjWzddr+tIjn5KryVtix1wphC5W+3MpPnGpucT4DxEWI/U/cd652vOnaYApCnOCjkYbKzFCaIr0azn8wg==" autocomplete="off" /></form><form class="gl-mb-3 gl-w-full" method="post" action="/users/auth/dingtalk"><button id="oauth-login-dingtalk" class="btn gl-button btn-default gl-w-full gl-mb-2 js-oauth-login  " type="submit"><img alt="DingTalk" title="Sign in with DingTalk" class="gl-button-icon lazy" data-src="/assets/auth_buttons/dingtalk_64-bdfcd26f5cd24bb90b5b3e2c1a4773ddef36f921a6478e82d49ecb6eb53acc8c.png" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" />
-<span class="gl-button-text">
-DingTalk
-</span>
-</button><input type="hidden" name="authenticity_token" value="HNLN9sm0I/oTPgAE11C1KQQXd7UDeTZ6GYnfbklTxwPs37zD0pfRXKZ9CNTvq57JVQYyZ2zmMx2gknykU8OCBQ==" autocomplete="off" /></form><form class="gl-mb-3 gl-w-full" method="post" action="/users/auth/alicloud"><button id="oauth-login-alicloud" class="btn gl-button btn-default gl-w-full gl-mb-2 js-oauth-login  " type="submit"><img alt="AliCloud" title="Sign in with AliCloud" class="gl-button-icon lazy" data-src="/assets/auth_buttons/alicloud_64-ff0a43fef6dca5105288f51454bcdf96712b90ab1f513a8eab3d54dfe0213694.png" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" />
-<span class="gl-button-text">
-AliCloud
-</span>
-</button><input type="hidden" name="authenticity_token" value="2fVp688Qakap3b1Z1pmFgeVYMw5bnx8BKpzQg5cXXdgp+Bje1DOY4ByetYnuYq5htEl23DQAGmaTh3NJjYcY3g==" autocomplete="off" /></form></div>
-<div class="gl-form-checkbox custom-control custom-checkbox">
-<input type="checkbox" name="remember_me" id="remember_me" class="custom-control-input" />
-<label class="custom-control-label" for="remember_me"><span>记住账号
-</span></label>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-</div>
-</div>
-</div>
-<hr class="footer-fixed">
-<div class="container footer-container gl-lg-display-flex gl-align-items-center gl-justify-content-space-between">
-<div class="footer-links gl-display-flex">
-<a href="/explore">探索</a>
-<a href="/help">帮助</a>
-<a href="https://about.gitlab.cn">极狐(GitLab)官网</a>
-</div>
-<div class="records gl-display-none gl-md-display-flex footer-links">
-<span class="record-item gl-display-flex gl-align-items-center">
-<img class="gl-mr-2 lazy" data-src="/assets/footer/anti-law-928014fd1478111affd68504f2450afb07d3eab1b69150f9af9791326a592c77.svg" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" />
-<a href="https://12377.cn/">违法和不良信息举报中心</a>
-</span>
-<span class="record-item gl-display-flex gl-align-items-center">
-<img class="gl-mr-2 lazy" data-src="/assets/footer/national-emblem-19e6a1836efc865e5a7892e555aeba3f70ad0ede3a39a614e84b0e65ae3e9cc7.svg" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" />
-<a class="jh-records-link" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=11010502047940" target="_blank">京公网安备11010502047940号</a>
-</span>
-<span class="record-item gl-display-flex gl-align-items-center">
-<a class="jh-records-link" href="https://beian.miit.gov.cn/#/Integrated/index" target="_blank">京ICP备2021036779号-1</a>
-</span>
-</div>
-</div>
-
-
-</div>
-</body>
-</html>
+#     # do not format submodules
+#     "library/backtrace",
+#     "library/portable-simd",
+#     "library/stdarch",
+#     "compiler/rustc_codegen_cranelift",
+#     "compiler/rustc_codegen_gcc",
+#     "src/doc/book",
+#     "src/doc/edition-guide",
+#     "src/doc/embedded-book",
+#     "src/doc/nomicon",
+#     "src/doc/reference",
+#     "src/doc/rust-by-example",
+#     "src/doc/rustc-dev-guide",
+#     "src/llvm-project",
+#     "src/tools/cargo",
+#     "src/tools/clippy",
+#     "src/tools/miri",
+#     "src/tools/rls",
+#     "src/tools/rust-analyzer",
+#     "src/tools/rustfmt",
+#     "src/tools/rust-installer",
+# ]
