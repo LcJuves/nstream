@@ -4,4 +4,4 @@
  * @author Liangcheng Juves
  */
 
-int utun_ifname(char *, int, size_t);
+int utun_ifname(char *, int);

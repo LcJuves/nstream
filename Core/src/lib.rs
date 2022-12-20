@@ -11,18 +11,14 @@ pub fn ifname(fd: core::ffi::c_int) -> Option<String> {
     #[cfg(target_os = "macos")]
     {
         extern "C" {
-            fn utun_ifname(
-                name: *mut core::ffi::c_char,
-                fd: core::ffi::c_int,
-                size: libc::size_t,
-            ) -> core::ffi::c_int;
+            fn utun_ifname(name: *mut core::ffi::c_char, fd: core::ffi::c_int) -> core::ffi::c_int;
         }
 
         let mut utunname = unsafe { core::mem::zeroed::<[core::ffi::c_char; libc::IFNAMSIZ]>() };
         seeval!(utunname);
 
         unsafe {
-            if utun_ifname(utunname.as_mut_ptr(), fd, libc::IFNAMSIZ as libc::size_t) != 0 {
+            if utun_ifname(utunname.as_mut_ptr(), fd) != 0 {
                 return None;
             }
         }
