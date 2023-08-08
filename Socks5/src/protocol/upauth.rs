@@ -1,4 +1,4 @@
-//! https://www.rfc-editor.org/rfc/rfc1929
+//! https://datatracker.ietf.org/doc/html/rfc1929
 
 use std::io::Result;
 

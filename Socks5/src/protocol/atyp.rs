@@ -1,4 +1,4 @@
-//! https://www.rfc-editor.org/rfc/rfc1928
+//! https://datatracker.ietf.org/doc/html/rfc1928
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum AddressType {
