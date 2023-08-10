@@ -9,9 +9,10 @@ pub use vtun::*;
 
 use core::ffi::{c_char, c_int};
 use core::mem::zeroed;
-use std::net::IpAddr;
+use std::net::{IpAddr, UdpSocket};
 
 use lazy_static::lazy_static;
+use maxminddb::{geoip2::Country, Reader};
 
 lazy_static! {
     pub static ref GEOIP2_COUNTRY_MMDB_BUF: &'static [u8] = include_bytes!("../Country.mmdb");
@@ -27,11 +28,10 @@ pub fn ifname(fd: c_int) -> Option<String> {
         let mut utunname = unsafe { zeroed::<[c_char; libc::IFNAMSIZ]>() };
         seeval!(utunname);
 
-        unsafe {
-            if utun_ifname(utunname.as_mut_ptr(), fd) != 0 {
-                return None;
-            }
+        if unsafe { utun_ifname(utunname.as_mut_ptr(), fd) } != 0 {
+            return None;
         }
+
         seeval!(utunname);
 
         let nstr =
@@ -46,12 +46,12 @@ pub fn ifname(fd: c_int) -> Option<String> {
 
 pub fn check_iso_code(address: IpAddr, iso_code: &str) -> bool {
     let buf = &GEOIP2_COUNTRY_MMDB_BUF;
-    let from_source_ret = maxminddb::Reader::from_source(buf.to_vec());
+    let from_source_ret = Reader::from_source(buf.to_vec());
     if from_source_ret.is_err() {
         return false;
     }
     let reader = from_source_ret.unwrap();
-    let lookup_ret = reader.lookup::<maxminddb::geoip2::Country>(address);
+    let lookup_ret = reader.lookup::<Country>(address);
     if lookup_ret.is_err() {
         return false;
     }
@@ -67,6 +67,18 @@ pub fn check_iso_code(address: IpAddr, iso_code: &str) -> bool {
 #[inline]
 pub fn is_cn_ip(address: IpAddr) -> bool {
     check_iso_code(address, "CN")
+}
+
+#[inline]
+pub fn what_is_my_ip() -> Option<String> {
+    if let Ok(udp_sock) = UdpSocket::bind("0.0.0.0:0") {
+        if let Ok(()) = udp_sock.connect("8.8.8.8:80") {
+            if let Ok(addr) = udp_sock.local_addr() {
+                return Some(addr.ip().to_string());
+            }
+        }
+    }
+    None
 }
 
 #[macro_export(local_inner_macros)]
