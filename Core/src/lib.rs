@@ -72,7 +72,7 @@ pub fn is_cn_ip(address: IpAddr) -> bool {
 #[inline]
 pub fn what_is_my_ip() -> Option<String> {
     if let Ok(udp_sock) = UdpSocket::bind("0.0.0.0:0") {
-        if let Ok(()) = udp_sock.connect("8.8.8.8:80") {
+        if let Ok(()) = udp_sock.connect("1.1.1.1:53") {
             if let Ok(addr) = udp_sock.local_addr() {
                 return Some(addr.ip().to_string());
             }
