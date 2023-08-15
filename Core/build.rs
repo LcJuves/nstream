@@ -1,3 +1,4 @@
+use std::path::Path;
 use std::{error::Error, fs::File, io::Write};
 
 use hyper::{
@@ -32,13 +33,18 @@ async fn download_maxmind_mmdb() -> Result<(), Box<dyn Error>> {
                 if !*prerelease {
                     let asset0 = &item["assets"].as_array().unwrap()[0];
                     let dbname = &asset0["name"].as_str().unwrap();
-                    let browser_download_url = &asset0["browser_download_url"].as_str().unwrap();
-                    let resp = get(browser_download_url).await?;
-                    let location_url = resp.headers().get("location").unwrap().to_str().unwrap();
-                    let mut resp = get(location_url).await?;
-                    let mut mmdb_file = File::create(dbname)?;
-                    while let Some(chunk) = resp.body_mut().data().await {
-                        mmdb_file.write_all(&mut chunk?)?;
+                    let db_fpath = Path::new(dbname);
+                    if !db_fpath.exists() {
+                        let browser_download_url =
+                            &asset0["browser_download_url"].as_str().unwrap();
+                        let resp = get(browser_download_url).await?;
+                        let location_url =
+                            resp.headers().get("location").unwrap().to_str().unwrap();
+                        let mut resp = get(location_url).await?;
+                        let mut mmdb_file = File::create(dbname)?;
+                        while let Some(chunk) = resp.body_mut().data().await {
+                            mmdb_file.write_all(&mut chunk?)?;
+                        }
                     }
                     break;
                 }
