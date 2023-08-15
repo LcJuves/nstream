@@ -1,5 +1,8 @@
 //! https://datatracker.ietf.org/doc/html/rfc1928
 
+use std::io::{Error, ErrorKind};
+use tokio::net::{TcpStream, UdpSocket};
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum ReplyField {
     Succeeded,
@@ -31,6 +34,48 @@ impl From<u8> for ReplyField {
     }
 }
 
+impl From<&Error> for ReplyField {
+    fn from(value: &Error) -> Self {
+        match value.kind() {
+            ErrorKind::ConnectionRefused => Self::ConnectionRefused,
+            // ErrorKind::NetworkDown |
+            ErrorKind::ConnectionReset | ErrorKind::NotConnected => Self::GeneralSocksServerFailure,
+            // ErrorKind::HostUnreachable => Self::HostUnreachable,
+            // ErrorKind::NetworkUnreachable => Self::NetworkUnreachable,
+            ErrorKind::ConnectionAborted => Self::ConnectionNotAllowedByRuleSet,
+            ErrorKind::TimedOut => Self::NetworkUnreachable,
+            ErrorKind::Other | _ => Self::Unassigned,
+        }
+    }
+}
+
+impl From<&Result<(), Error>> for ReplyField {
+    fn from(value: &Result<(), Error>) -> Self {
+        match value {
+            Ok(_) => Self::Succeeded,
+            Err(e) => e.into(),
+        }
+    }
+}
+
+impl From<&Result<TcpStream, Error>> for ReplyField {
+    fn from(value: &Result<TcpStream, Error>) -> Self {
+        match value {
+            Ok(_) => Self::Succeeded,
+            Err(e) => e.into(),
+        }
+    }
+}
+
+impl From<&Result<UdpSocket, Error>> for ReplyField {
+    fn from(value: &Result<UdpSocket, Error>) -> Self {
+        match value {
+            Ok(_) => Self::Succeeded,
+            Err(e) => e.into(),
+        }
+    }
+}
+
 impl Into<u8> for ReplyField {
     fn into(self) -> u8 {
         match self {
@@ -45,5 +90,11 @@ impl Into<u8> for ReplyField {
             Self::AddressTypeNotSupported => 0x08,
             Self::Unassigned => 0x09,
         }
+    }
+}
+
+impl Default for ReplyField {
+    fn default() -> Self {
+        Self::Succeeded
     }
 }

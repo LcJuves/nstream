@@ -25,14 +25,17 @@ pub struct HandshakeResponse {
 }
 
 impl HandshakeResponse {
+    #[inline]
     pub fn new(method: AuthMethod) -> Self {
         Self { method }
     }
 
+    #[inline]
     pub fn method(&self) -> AuthMethod {
         self.method.to_owned()
     }
 
+    #[inline]
     pub fn as_bytes(&self) -> Vec<u8> {
         vec![crate::SOCKS_VERSION, self.method.to_owned().into()]
     }

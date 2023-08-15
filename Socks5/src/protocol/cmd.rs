@@ -1,3 +1,5 @@
+//! https://datatracker.ietf.org/doc/html/rfc1928
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum Command {
     Connect,

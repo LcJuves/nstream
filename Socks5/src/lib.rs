@@ -4,12 +4,16 @@ pub mod protocol;
 use std::io::Read;
 use std::io::{Error, ErrorKind, Result};
 
-use tokio::io::{copy_bidirectional, AsyncRead, AsyncReadExt, AsyncWrite};
+use tokio::{
+    io::{copy_bidirectional, AsyncRead, AsyncReadExt, AsyncWrite},
+    net::TcpStream,
+};
 
 pub const SOCKS_VERSION: u8 = 0x05;
 pub const AUTH_VERSION: u8 = 0x01;
 pub const RSV_RESERVED: u8 = 0x00;
 
+#[inline]
 pub(crate) fn throw_io_error(msg: &str) -> Error {
     Error::new(ErrorKind::Unsupported, msg)
 }
@@ -57,6 +61,16 @@ where
     T: AsyncRead + AsyncWrite + Unpin + ?Sized,
 {
     Ok(copy_bidirectional(from, to).await?)
+}
+
+pub async fn wait_closed(tcp_stream: &mut TcpStream) -> Result<()> {
+    loop {
+        match tcp_stream.read(&mut [0]).await {
+            Ok(0) => break Ok(()),
+            Ok(_) => {}
+            Err(err) => break Err(err),
+        }
+    }
 }
 
 #[inline]

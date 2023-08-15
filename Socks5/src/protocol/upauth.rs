@@ -30,14 +30,17 @@ pub struct UsernamePasswordAuth {
 }
 
 impl UsernamePasswordAuth {
+    #[inline]
     pub fn new(uname: &str, passwd: &str) -> Self {
         Self { usr: uname.to_string(), pwd: passwd.to_string() }
     }
 
+    #[inline]
     pub fn uname(&self) -> String {
         self.usr.to_owned()
     }
 
+    #[inline]
     pub fn passwd(&self) -> String {
         self.pwd.to_owned()
     }

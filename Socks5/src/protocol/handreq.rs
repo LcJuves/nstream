@@ -26,10 +26,12 @@ pub struct HandshakeRequest {
 }
 
 impl HandshakeRequest {
+    #[inline]
     pub fn new(methods: Vec<AuthMethod>) -> Self {
         Self { methods }
     }
 
+    #[inline]
     pub fn methods(&self) -> Vec<AuthMethod> {
         self.methods.to_owned()
     }

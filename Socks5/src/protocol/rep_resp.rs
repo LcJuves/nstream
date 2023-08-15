@@ -1,10 +1,8 @@
 //! https://datatracker.ietf.org/doc/html/rfc1928
 
-use tokio::io::{AsyncRead, AsyncReadExt};
-
 use super::{Address, AddressType, ReplyField};
 
-use std::io::Result;
+use tokio::io::{copy, AsyncRead, AsyncReadExt, AsyncWrite, BufReader, Result};
 
 /// The SOCKS request information is sent by the client as soon as it has
 /// established a connection to the SOCKS server, and completed the
@@ -21,38 +19,50 @@ use std::io::Result;
 #[derive(Debug, Clone)]
 pub struct ReplyResponse {
     rep: ReplyField,
-    atyp: AddressType,
     /// This content format is as follows:
     ///     ```127.0.0.1:80```, ```github.com:443``` or ```[2001:db8:1:0:20c:29ff:fe96:8b55]:8080```
     addr: Address,
 }
 
 impl ReplyResponse {
-    pub fn as_bytes(&self) -> Result<Vec<u8>> {
+    pub fn as_bytes(&self) -> Vec<u8> {
         let mut ret = vec![
-            crate::SOCKS_VERSION,        /* VER */
-            self.rep.to_owned().into(),  /* REP */
-            crate::RSV_RESERVED,         /* RSV */
-            self.atyp.to_owned().into(), /* ATYP */
+            crate::SOCKS_VERSION, /* VER */
+            self.rep().into(),    /* REP */
+            crate::RSV_RESERVED,  /* RSV */
+            self.atyp().into(),   /* ATYP */
         ];
         ret.extend_from_slice(&self.addr.as_socks_bytes());
-        Ok(ret)
+        ret
     }
 
-    pub fn new(rep: ReplyField, atyp: AddressType, addr: Address) -> Self {
-        Self { rep, atyp, addr }
+    #[inline]
+    pub fn new(rep: ReplyField, addr: Address) -> Self {
+        Self { rep, addr }
     }
 
+    #[inline]
     pub fn rep(&self) -> ReplyField {
         self.rep.to_owned()
     }
 
+    #[inline]
     pub fn atyp(&self) -> AddressType {
-        self.atyp.to_owned()
+        self.addr().into()
     }
 
+    #[inline]
     pub fn addr(&self) -> Address {
         self.addr.to_owned()
+    }
+
+    pub async fn respond_with<'a, W>(&self, writer: &'a mut W) -> Result<u64>
+    where
+        W: AsyncWrite + Unpin + ?Sized,
+    {
+        let resp_bytes = self.as_bytes();
+        let mut resp_bytes_reader = BufReader::new(resp_bytes.as_slice());
+        copy(&mut resp_bytes_reader, writer).await
     }
 }
 
@@ -66,20 +76,19 @@ impl ReplyResponse {
         crate::check_rsv(r).await?;
         let atyp = r.read_u8().await?.try_into()?;
         let addr = Address::from_socks_bytes(r, &atyp).await?;
-        Ok(Self { rep, atyp, addr })
+        Ok(Self { rep, addr })
     }
 }
 
 #[test]
 fn test_from() -> std::io::Result<()> {
-    use tokio::io::BufReader;
     let tokio_rt = tokio::runtime::Runtime::new()?;
 
     let v4reqbytes = [5u8, 1, 0, 1, 127, 0, 0, 1, 0x00, 0x50];
     let mut v4reqbufrd = BufReader::new(&v4reqbytes[..]);
     let v4req = tokio_rt.block_on(ReplyResponse::from(&mut v4reqbufrd))?;
     assert!(v4req.rep == ReplyField::GeneralSocksServerFailure);
-    assert!(v4req.atyp == AddressType::IPV4);
+    assert!(v4req.atyp() == AddressType::IPV4);
     assert_eq!(v4req.addr, (std::net::Ipv4Addr::LOCALHOST, 80).into());
 
     let dnreqbytes = [
@@ -88,7 +97,7 @@ fn test_from() -> std::io::Result<()> {
     ];
     let mut dnreqbufrd = BufReader::new(&dnreqbytes[..]);
     let dnreq = tokio_rt.block_on(ReplyResponse::from(&mut dnreqbufrd))?;
-    assert!(dnreq.atyp == AddressType::FQDN);
+    assert!(dnreq.atyp() == AddressType::FQDN);
     assert_eq!(dnreq.addr, Address::Domain(String::from("github.com"), 443));
 
     let v6reqbytes = [
@@ -97,7 +106,7 @@ fn test_from() -> std::io::Result<()> {
     ];
     let mut v6reqbufrd = BufReader::new(&v6reqbytes[..]);
     let v6req = tokio_rt.block_on(ReplyResponse::from(&mut v6reqbufrd))?;
-    assert!(v6req.atyp == AddressType::IPV6);
+    assert!(v6req.atyp() == AddressType::IPV6);
     assert_eq!(
         v6req.addr,
         ("2001:db8:1:0:20c:29ff:fe96:8b55".parse::<std::net::Ipv6Addr>().unwrap(), 8080).into()

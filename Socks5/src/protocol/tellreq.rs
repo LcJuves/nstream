@@ -26,36 +26,39 @@ use tokio::io::{AsyncRead, AsyncReadExt};
 #[derive(Debug, Clone)]
 pub struct TellRequest {
     cmd: Command,
-    atyp: AddressType,
     /// This content format is as follows:
     ///     ```127.0.0.1:80```, ```github.com:443``` or ```[2001:db8:1:0:20c:29ff:fe96:8b55]:8080```
     addr: Address,
 }
 
 impl TellRequest {
-    pub fn as_bytes(&self) -> Result<Vec<u8>> {
+    pub fn as_bytes(&self) -> Vec<u8> {
         let mut ret = vec![
-            crate::SOCKS_VERSION,        /* VER */
-            self.cmd.to_owned().into(),  /* CMD */
-            crate::RSV_RESERVED,         /* RSV */
-            self.atyp.to_owned().into(), /* ATYP */
+            crate::SOCKS_VERSION, /* VER */
+            self.cmd().into(),    /* CMD */
+            crate::RSV_RESERVED,  /* RSV */
+            self.atyp().into(),   /* ATYP */
         ];
         ret.extend_from_slice(&self.addr.as_socks_bytes());
-        Ok(ret)
+        ret
     }
 
-    pub fn new(cmd: Command, atyp: AddressType, addr: Address) -> Self {
-        Self { cmd, atyp, addr }
+    #[inline]
+    pub fn new(cmd: Command, addr: Address) -> Self {
+        Self { cmd, addr }
     }
 
+    #[inline]
     pub fn cmd(&self) -> Command {
         self.cmd.to_owned()
     }
 
+    #[inline]
     pub fn atyp(&self) -> AddressType {
-        self.atyp.to_owned()
+        self.addr().into()
     }
 
+    #[inline]
     pub fn addr(&self) -> Address {
         self.addr.to_owned()
     }
@@ -71,7 +74,7 @@ impl TellRequest {
         crate::check_rsv(r).await?;
         let atyp = r.read_u8().await?.try_into()?;
         let addr = Address::from_socks_bytes(r, &atyp).await?;
-        Ok(Self { cmd, atyp, addr })
+        Ok(Self { cmd, addr })
     }
 }
 
@@ -84,7 +87,7 @@ fn test_from() -> std::io::Result<()> {
     let mut v4reqbufrd = BufReader::new(&v4reqbytes[..]);
     let v4req = tokio_rt.block_on(TellRequest::from(&mut v4reqbufrd))?;
     assert!(v4req.cmd == Command::Connect);
-    assert!(v4req.atyp == AddressType::IPV4);
+    assert!(v4req.atyp() == AddressType::IPV4);
     assert_eq!(v4req.addr, (std::net::Ipv4Addr::LOCALHOST, 80).into());
 
     let dnreqbytes = [
@@ -93,7 +96,7 @@ fn test_from() -> std::io::Result<()> {
     ];
     let mut dnreqbufrd = BufReader::new(&dnreqbytes[..]);
     let dnreq = tokio_rt.block_on(TellRequest::from(&mut dnreqbufrd))?;
-    assert!(dnreq.atyp == AddressType::FQDN);
+    assert!(dnreq.atyp() == AddressType::FQDN);
     assert_eq!(dnreq.addr, Address::Domain(String::from("github.com"), 443));
 
     let v6reqbytes = [
@@ -102,11 +105,21 @@ fn test_from() -> std::io::Result<()> {
     ];
     let mut v6reqbufrd = BufReader::new(&v6reqbytes[..]);
     let v6req = tokio_rt.block_on(TellRequest::from(&mut v6reqbufrd))?;
-    assert!(v6req.atyp == AddressType::IPV6);
+    assert!(v6req.atyp() == AddressType::IPV6);
     assert_eq!(
         v6req.addr,
         ("2001:db8:1:0:20c:29ff:fe96:8b55".parse::<std::net::Ipv6Addr>().unwrap(), 8080).into()
     );
 
     Ok(())
+}
+
+#[test]
+fn test_as_bytes() {
+    let tellreq = TellRequest::new(Command::Connect, Address::default());
+    let tellreq_bytes = tellreq.as_bytes();
+    let mut vec = vec![5u8, 1, 0, 1];
+    vec.extend_from_slice(&tellreq.addr().as_socks_bytes());
+    assert_eq!(tellreq_bytes, vec);
+    assert_eq!(&vec[4..], [0, 0, 0, 0, 0, 0]);
 }
