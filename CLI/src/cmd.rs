@@ -53,6 +53,7 @@ pub(crate) fn open_socks5_proxy(ip: &str, usr: &str, pwd: &str) -> Result<()> {
 }
 
 #[cfg(target_os = "macos")]
+#[allow(dead_code)]
 pub(crate) fn close_socks5_proxy() -> Result<()> {
     assert!(exec_networksetup(&["-setsocksfirewallproxystate", NETWORK_SERVICE, "off"])?.success());
     Ok(())
