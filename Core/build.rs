@@ -61,8 +61,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     #[cfg(target_os = "macos")]
     {
         let mut build = cc::Build::new();
-        build.include("src/ifname").cpp(false).file("src/ifname/ifname.c");
-        build.compile("ifname");
+        build.include("src/darwin_syscall").cpp(false).file("src/darwin_syscall/utun_ifname.c");
+        build.compile("darwin_syscall");
     }
 
     let rt = tokio::runtime::Runtime::new()?;

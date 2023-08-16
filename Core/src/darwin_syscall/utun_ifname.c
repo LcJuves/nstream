@@ -3,7 +3,7 @@
 #include <sys/socket.h>
 #include <sys/sys_domain.h>
 
-#include "ifname.h"
+#include "utun_ifname.h"
 
 int utun_ifname(char *utunname, int fd) {
     // Get iface name of newly created utun dev.
