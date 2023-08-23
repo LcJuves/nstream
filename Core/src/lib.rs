@@ -1,47 +1,40 @@
 #[cfg(target_os = "macos")]
-pub mod utun;
-
+mod utun;
 #[cfg(target_os = "macos")]
-pub use utun::UTun;
+pub use utun::*;
 
 mod vtun;
 pub use vtun::*;
 
-use core::ffi::{c_char, c_int};
-use core::mem::zeroed;
+mod tun;
+pub use tun::*;
+
+mod vtun_conf;
+pub use vtun_conf::*;
+
+use core::ffi::c_int;
 use std::net::{IpAddr, UdpSocket};
 
 use lazy_static::lazy_static;
+use libc::{fcntl, FD_CLOEXEC, F_GETFL, F_SETFD, F_SETFL, O_NONBLOCK};
 use maxminddb::{geoip2::Country, Reader};
 
 lazy_static! {
     pub static ref GEOIP2_COUNTRY_MMDB_BUF: &'static [u8] = include_bytes!("../Country.mmdb");
 }
 
-pub fn ifname(fd: c_int) -> Option<String> {
-    #[cfg(target_os = "macos")]
-    {
-        extern "C" {
-            fn utun_ifname(name: *mut c_char, fd: c_int) -> c_int;
-        }
-
-        let mut utunname = unsafe { zeroed::<[c_char; libc::IFNAMSIZ]>() };
-        seeval!(utunname);
-
-        if unsafe { utun_ifname(utunname.as_mut_ptr(), fd) } != 0 {
-            return None;
-        }
-
-        seeval!(utunname);
-
-        let nstr =
-            unsafe { std::ffi::CStr::from_ptr(utunname.as_ptr()) }.to_string_lossy().to_string();
-        seeval!(nstr);
-        return if nstr.is_empty() { None } else { Some(nstr) };
+pub fn set_nonblock(fd: c_int) -> c_int {
+    let mut flag: c_int = unsafe { fcntl(fd, F_GETFL, 0) };
+    if flag < 0 {
+        return flag;
     }
+    flag |= O_NONBLOCK;
+    unsafe { fcntl(fd, F_SETFL, flag) }
+}
 
-    #[allow(unreachable_code)]
-    None
+#[inline]
+pub fn set_cloexec(fd: c_int) -> c_int {
+    unsafe { fcntl(fd, F_SETFD, FD_CLOEXEC) }
 }
 
 pub fn check_iso_code(address: IpAddr, iso_code: &str) -> bool {
@@ -93,7 +86,7 @@ macro_rules! debug_print {
 macro_rules! debug_println {
     ($($arg:tt)*) => {
         #[cfg(debug_assertions)]
-        std::println!($($arg)*);
+        std::println!($($arg)*)
     }
 }
 
@@ -106,7 +99,7 @@ macro_rules! seeval {
             core::line!(),
             core::stringify!($val),
             $val
-        );
+        )
     };
 }
 
