@@ -1,5 +1,6 @@
 mod cmd;
 
+use core::net::Ipv6Addr;
 use std::error::Error;
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -15,7 +16,7 @@ use tokio::net::{TcpListener, TcpStream};
 use tokio::signal;
 use tokio::sync::Mutex;
 
-use nstream_core::{seeval, what_is_my_ip};
+use nstream_core::{seeval, what_is_my_lanip_v6addr};
 
 // use libc::{signal, SIGINT};
 
@@ -87,8 +88,8 @@ async fn impl_udp_associate(
                     let mut back_data = [0u8; u16::MAX as usize];
                     let len = (&to_udp_sock).recv(&mut back_data).await?;
                     let back_data = &back_data[..len];
-                    seeval!(back_data.clone());
-                    println!("String(back_data) >>> {}", String::from_utf8_lossy(back_data.clone()));
+                    seeval!(back_data);
+                    println!("String(back_data) >>> {}", String::from_utf8_lossy(back_data));
 
                     let from_addr = *incoming_addr.lock().await;
 
@@ -126,13 +127,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let usr = Arc::new("aaa".to_string());
     let pwd = Arc::new("bbb".to_string());
-    let my_ip = what_is_my_ip().unwrap_or("127.0.0.1".to_string());
-    seeval!(my_ip);
+    let my_lanip_v6addr = what_is_my_lanip_v6addr().unwrap_or(Ipv6Addr::LOCALHOST.to_string());
+    seeval!(my_lanip_v6addr);
 
     crate::cmd::close_socks5_proxy()?;
-    // crate::cmd::open_socks5_proxy(&my_ip, &usr, &pwd)?;
+    // crate::cmd::open_socks5_proxy(&my_lanip_v6addr, &usr, &pwd)?;
     let tcp_listener =
-        TcpListener::bind(format!("{}:{}", &my_ip, crate::cmd::SOCKS5_PROXY_HOST_PORT)).await?;
+        TcpListener::bind(format!("{}:{}", &my_lanip_v6addr, crate::cmd::SOCKS5_PROXY_HOST_PORT))
+            .await?;
 
     while let Ok((mut tcp_stream, _)) = tcp_listener.accept().await {
         let _usr = usr.clone();

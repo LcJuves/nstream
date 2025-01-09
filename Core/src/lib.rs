@@ -13,7 +13,8 @@ mod vtun_conf;
 pub use vtun_conf::*;
 
 use core::ffi::c_int;
-use std::net::{IpAddr, UdpSocket};
+use core::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
+use std::net::UdpSocket;
 
 use lazy_static::lazy_static;
 use libc::{fcntl, FD_CLOEXEC, F_GETFL, F_SETFD, F_SETFL, O_NONBLOCK};
@@ -62,16 +63,32 @@ pub fn is_cn_ip(address: IpAddr) -> bool {
     check_iso_code(address, "CN")
 }
 
-#[inline]
-pub fn what_is_my_ip() -> Option<String> {
-    if let Ok(udp_sock) = UdpSocket::bind("0.0.0.0:0") {
-        if let Ok(()) = udp_sock.connect("1.1.1.1:53") {
+fn try_get_lanip_addr(
+    sockaddr_unspec: SocketAddr,
+    sockaddr_broadcast: SocketAddr,
+) -> Option<String> {
+    if let Ok(udp_sock) = UdpSocket::bind(sockaddr_unspec) {
+        if let Ok(()) = udp_sock.connect(sockaddr_broadcast) {
             if let Ok(addr) = udp_sock.local_addr() {
                 return Some(addr.ip().to_string());
             }
         }
     }
     None
+}
+
+#[inline]
+pub fn what_is_my_lanip_v6addr() -> Option<String> {
+    let sockaddr_unspec = SocketAddr::new(IpAddr::V6(Ipv6Addr::UNSPECIFIED), 0);
+    let sockaddr_broadcast = SocketAddr::new(IpAddr::V6(Ipv4Addr::BROADCAST.to_ipv6_mapped()), 1);
+    return try_get_lanip_addr(sockaddr_unspec, sockaddr_broadcast);
+}
+
+#[inline]
+pub fn what_is_my_lanip_v4addr() -> Option<String> {
+    let sockaddr_unspec = SocketAddr::new(IpAddr::V4(Ipv4Addr::UNSPECIFIED), 0);
+    let sockaddr_broadcast = SocketAddr::new(IpAddr::V4(Ipv4Addr::BROADCAST), 1);
+    return try_get_lanip_addr(sockaddr_unspec, sockaddr_broadcast);
 }
 
 #[macro_export(local_inner_macros)]
