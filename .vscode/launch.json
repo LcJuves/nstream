@@ -5,65 +5,47 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "lldb",
-      "request": "launch",
-      "name": "Debug unit tests in library 'nstream-core'",
-      "cargo": {
-        "args": ["test", "--no-run", "--lib", "--package=nstream-core"],
-        "filter": {
-          "name": "nstream-core",
-          "kind": "lib"
-        }
-      },
-      "args": [],
-      "cwd": "${workspaceFolder}"
-    },
-    {
-      "type": "lldb",
-      "request": "launch",
-      "name": "Debug unit tests in library 'socks5'",
-      "cargo": {
-        "args": ["test", "--no-run", "--lib", "--package=socks5"],
-        "filter": {
-          "name": "socks5",
-          "kind": "lib"
-        }
-      },
-      "args": [],
-      "cwd": "${workspaceFolder}"
-    },
-    {
-      "type": "lldb",
-      "request": "launch",
       "name": "Debug executable 'nstream-cli'",
-      "cargo": {
-        "args": ["build", "--bin=nstream-cli", "--package=nstream-cli"],
-        "filter": {
-          "name": "nstream-cli",
-          "kind": "bin"
-        }
-      },
-      "args": [],
-      "cwd": "${workspaceFolder}"
-    },
-    {
       "type": "lldb",
       "request": "launch",
-      "name": "Debug unit tests in executable 'nstream-cli'",
       "cargo": {
-        "args": [
-          "test",
-          "--no-run",
-          "--bin=nstream-cli",
-          "--package=nstream-cli"
-        ],
-        "filter": {
-          "name": "nstream-cli",
-          "kind": "bin"
-        }
+        "args": ["run", "--bin=nstream-cli", "--package=nstream-cli"],
       },
       "args": [],
-      "cwd": "${workspaceFolder}"
-    }
-  ]
+    },
+
+    {
+      "name": "Debug unit tests in library 'nstream_core'",
+      "type": "lldb",
+      "request": "launch",
+      "cargo": {
+        "args": ["test", "--package=nstream-core"],
+      },
+    },
+    {
+      "name": "Debug unit tests in library 'socks5'",
+      "type": "lldb",
+      "request": "launch",
+      "cargo": {
+        "args": ["test", "--package=socks5"],
+      },
+    },
+    {
+      "name": "Debug executable 'nstream-cli'",
+      "type": "lldb",
+      "request": "launch",
+      "cargo": {
+        "args": ["run", "--bin=nstream-cli", "--package=nstream-cli"],
+      },
+      "args": [],
+    },
+    {
+      "name": "Debug unit tests in executable 'nstream-cli'",
+      "type": "lldb",
+      "request": "launch",
+      "cargo": {
+        "args": ["test", "--bin=nstream-cli", "--package=nstream-cli"],
+      },
+    },
+  ],
 }

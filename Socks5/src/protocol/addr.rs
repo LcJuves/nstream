@@ -230,11 +230,11 @@ impl Default for Address {
 
 #[test]
 fn test_to_string() {
-    let addr_ipv4: Address = (Ipv4Addr::LOCALHOST, 80).into();
-    assert_eq!(addr_ipv4.to_string(), "127.0.0.1:80");
+    let ipv4_addr: Address = (Ipv4Addr::LOCALHOST, 80).into();
+    assert_eq!(ipv4_addr.to_string(), "127.0.0.1:80");
 
-    let addr_ipv6: Address = (Ipv6Addr::LOCALHOST, 80).into();
-    assert_eq!(addr_ipv6.to_string(), "[::1]:80");
+    let ipv6_addr: Address = (Ipv6Addr::LOCALHOST, 80).into();
+    assert_eq!(ipv6_addr.to_string(), "[::1]:80");
 }
 
 #[test]
@@ -271,8 +271,8 @@ fn test_from_socks_bytes() -> Result<()> {
 
 #[test]
 fn test_as_socks_bytes() {
-    let addr_ipv4: Address = (Ipv4Addr::LOCALHOST, 80).into();
-    assert_eq!(addr_ipv4.as_socks_bytes(), vec![127, 0, 0, 1, 0x00, 0x50]);
+    let ipv4_addr: Address = (Ipv4Addr::LOCALHOST, 80).into();
+    assert_eq!(ipv4_addr.as_socks_bytes(), vec![127, 0, 0, 1, 0x00, 0x50]);
 
     let addr_dn: Address = Address::Domain(String::from("github.com"), 443);
     assert_eq!(
@@ -283,11 +283,11 @@ fn test_as_socks_bytes() {
         ]
     );
 
-    let addr_ipv6: Address =
+    let ipv6_addr: Address =
         (Ipv6Addr::new(0x2001, 0xdb8, 0x1, 0x0, 0x20c, 0x29ff, 0xfe96, 0x8b55), 8080).into();
 
     assert_eq!(
-        addr_ipv6.as_socks_bytes(),
+        ipv6_addr.as_socks_bytes(),
         vec![
             0x20, 0x01, 0x0d, 0xb8, 0x00, 0x01, 0x00, 0x00, 0x02, 0x0c, 0x29, 0xff, 0xfe, 0x96,
             0x8b, 0x55, /* begin port */ 0x1f, 0x90

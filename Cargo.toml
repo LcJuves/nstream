@@ -1,1 +1,2 @@
 workspace.members = ["Core", "Socks5", "CLI"]
+workspace.resolver = "3"

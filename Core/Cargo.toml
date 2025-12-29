@@ -1,13 +1,13 @@
 [package]
 name = "nstream-core"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 libc = "0.2.138"
-maxminddb = { version = "0.23.0" }
+maxminddb = "0.27.1"
 lazy_static = "1.4.0"
 
 [build-dependencies]

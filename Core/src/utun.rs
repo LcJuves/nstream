@@ -1,17 +1,17 @@
-use crate::{debug_println, seeval, set_cloexec, set_nonblock, Tun, VTunConfig};
+use crate::{Tun, VTunConfig, debug_println, seeval, set_cloexec, set_nonblock};
 
 use core::ffi::{c_char, c_int, c_uchar, c_uint, c_ulong, c_void};
-use core::mem::{size_of, size_of_val, transmute, transmute_copy, zeroed};
+use core::mem::{size_of, size_of_val, transmute, zeroed};
 use std::ffi::CString;
 use std::fmt::Debug;
 use std::io::{Error, ErrorKind, Result};
 use std::net::SocketAddr;
 
 use libc::{
-    c_short, close, connect, ctl_info, freeifaddrs, getifaddrs, if_nametoindex, ifaddrs, in_addr_t,
-    ioctl, sa_family_t, sockaddr, sockaddr_ctl, sockaddr_in, sockaddr_in6, socket, socklen_t,
-    strcpy, AF_INET, AF_INET6, AF_SYSTEM, AF_SYS_CONTROL, CTLIOCGINFO, IFF_UP, IFNAMSIZ,
-    MAX_KCTL_NAME, PF_SYSTEM, SOCK_DGRAM, SYSPROTO_CONTROL,
+    AF_INET, AF_SYS_CONTROL, AF_SYSTEM, CTLIOCGINFO, IFF_UP, IFNAMSIZ, MAX_KCTL_NAME, PF_SYSTEM,
+    SOCK_DGRAM, SYSPROTO_CONTROL, c_short, close, connect, ctl_info, freeifaddrs, getifaddrs,
+    if_nametoindex, ifaddrs, in_addr_t, ioctl, sa_family_t, sockaddr, sockaddr_ctl, sockaddr_in,
+    sockaddr_in6, socket, socklen_t, strcpy,
 };
 
 /// Name registered by the utun kernel control
@@ -204,7 +204,7 @@ impl Tun for UTun {
     }
 
     fn ifname(&self) -> Result<String> {
-        extern "C" {
+        unsafe extern "C" {
             fn utun_ifname(name: *mut c_char, fd: c_int) -> c_int;
         }
 
@@ -252,7 +252,7 @@ impl Tun for UTun {
         if let Some(ipv4) = ipv4 {
             let mut sin = unsafe { zeroed::<sockaddr_in>() };
             sin.sin_family = AF_INET as sa_family_t;
-            sin.sin_addr.s_addr = unsafe { transmute::<[u8; 4], in_addr_t>(ipv4.octets()) };
+            sin.sin_addr.s_addr = u32::from_ne_bytes(ipv4.octets()) as in_addr_t;
 
             ifreq.ifr_ifru.ifru_addr = unsafe { transmute::<sockaddr_in, sockaddr>(sin) };
             if unsafe { ioctl(sockfd, SIOCSIFADDR, &mut ifreq) } < 0 {
@@ -261,7 +261,7 @@ impl Tun for UTun {
             }
         }
 
-        if let Some(ipv6) = ipv6 {
+        if let Some(_ipv6) = ipv6 {
             todo!("IPV6 support for utunX device")
             /* let mut sin6 = unsafe { zeroed::<sockaddr_in6>() };
             sin6.sin6_family = AF_INET6 as sa_family_t;

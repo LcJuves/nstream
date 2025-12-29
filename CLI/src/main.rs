@@ -1,8 +1,7 @@
 mod cmd;
 
-use core::net::Ipv6Addr;
+use core::net::{Ipv6Addr, SocketAddr};
 use std::error::Error;
-use std::net::SocketAddr;
 use std::sync::Arc;
 
 use socks5::protocol::{
@@ -17,8 +16,6 @@ use tokio::signal;
 use tokio::sync::Mutex;
 
 use nstream_core::{seeval, what_is_my_lanip_v6addr};
-
-// use libc::{signal, SIGINT};
 
 async fn register_graceful_shutdown() {
     match signal::ctrl_c().await {
@@ -131,9 +128,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     seeval!(my_lanip_v6addr);
 
     crate::cmd::close_socks5_proxy()?;
-    // crate::cmd::open_socks5_proxy(&my_lanip_v6addr, &usr, &pwd)?;
+    crate::cmd::open_socks5_proxy(&my_lanip_v6addr, &usr, &pwd)?;
     let tcp_listener =
-        TcpListener::bind(format!("{}:{}", &my_lanip_v6addr, crate::cmd::SOCKS5_PROXY_HOST_PORT))
+        TcpListener::bind(format!("[{}]:{}", &my_lanip_v6addr, crate::cmd::SOCKS5_PROXY_HOST_PORT))
             .await?;
 
     while let Ok((mut tcp_stream, _)) = tcp_listener.accept().await {

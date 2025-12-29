@@ -45,17 +45,23 @@ pub fn check_iso_code(address: IpAddr, iso_code: &str) -> bool {
         return false;
     }
     let reader = from_source_ret.unwrap();
-    let lookup_ret = reader.lookup::<Country>(address);
+    let lookup_ret = reader.lookup(address);
     if lookup_ret.is_err() {
         return false;
     }
-    let opt_country = lookup_ret.unwrap().country;
-    if opt_country.is_none() {
+    let lookup_ret = lookup_ret.unwrap();
+    let decode_country_ret = lookup_ret.decode::<Country>();
+    if decode_country_ret.is_err() {
         return false;
     }
-    let country = opt_country.unwrap();
-    seeval!(country);
-    country.iso_code == Some(iso_code)
+
+    if let Some(country_ret) = decode_country_ret.unwrap() {
+        seeval!(country_ret);
+        let iso_code_ret = country_ret.country.iso_code;
+        return iso_code_ret == Some(iso_code);
+    }
+
+    false
 }
 
 #[inline]
