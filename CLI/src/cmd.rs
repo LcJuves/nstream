@@ -12,13 +12,11 @@
 //! networksetup -setsocksfirewallproxystate $networkservice on'
 //! ```
 
-#[cfg(target_os = "macos")]
-use std::ffi::OsStr;
 use std::io::Result;
 #[cfg(target_os = "macos")]
 use std::process::{Command, ExitStatus, Stdio};
-
-pub(crate) const SOCKS5_PROXY_HOST_PORT: u16 = 19934;
+#[cfg(target_os = "macos")]
+use std::{ffi::OsStr, net::SocketAddr};
 
 #[cfg(target_os = "macos")]
 pub(crate) const NETWORK_SERVICE: &'static str = "Wi-Fi";
@@ -37,12 +35,15 @@ fn exec_networksetup<S: AsRef<OsStr>>(args: &[S]) -> Result<ExitStatus> {
 #[cfg(target_os = "macos")]
 #[allow(unused_variables)]
 #[allow(dead_code)]
-pub(crate) fn open_socks5_proxy(ip: &str, usr: &str, pwd: &str) -> Result<()> {
+pub(crate) fn open_socks5_proxy(socket_addr: SocketAddr, usr: &str, pwd: &str) -> Result<()> {
     assert!(exec_networksetup(&[
         "-setsocksfirewallproxy",
         NETWORK_SERVICE,
-        ip,
-        &SOCKS5_PROXY_HOST_PORT.to_string()
+        &socket_addr.ip().to_string(),
+        &socket_addr.port().to_string(),
+        "on",
+        usr,
+        pwd
     ])?
     .success());
 

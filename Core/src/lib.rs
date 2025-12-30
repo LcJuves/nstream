@@ -1,27 +1,39 @@
 #[cfg(target_os = "macos")]
 mod utun;
+use tokio::net::UdpSocket;
 #[cfg(target_os = "macos")]
 pub use utun::*;
-
-mod vtun;
-pub use vtun::*;
 
 mod tun;
 pub use tun::*;
 
+mod vtun;
+pub use vtun::*;
+
 mod vtun_conf;
 pub use vtun_conf::*;
 
+use core::error::Error;
 use core::ffi::c_int;
 use core::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
-use std::net::UdpSocket;
+use std::io::Result;
+use std::net::{SocketAddrV4, SocketAddrV6};
 
 use lazy_static::lazy_static;
-use libc::{fcntl, FD_CLOEXEC, F_GETFL, F_SETFD, F_SETFL, O_NONBLOCK};
-use maxminddb::{geoip2::Country, Reader};
+use libc::{F_GETFL, F_SETFD, F_SETFL, FD_CLOEXEC, O_NONBLOCK, fcntl};
+use maxminddb::{Reader, geoip2::Country};
+use stunclient::StunClient;
 
 lazy_static! {
     pub static ref GEOIP2_COUNTRY_MMDB_BUF: &'static [u8] = include_bytes!("../Country.mmdb");
+    pub static ref SOCKET_ADDR_V6_STUN: SocketAddr = SocketAddr::V6(SocketAddrV6::new(
+        "2600:1f16:8c5:101:80b:b58b:828:8df4".parse::<Ipv6Addr>().unwrap(),
+        3478,
+        0,
+        0
+    ));
+    pub static ref SOCKET_ADDR_V4_STUN: SocketAddr =
+        SocketAddr::V4(SocketAddrV4::new("3.22.142.132".parse::<Ipv4Addr>().unwrap(), 3478));
 }
 
 pub fn set_nonblock(fd: c_int) -> c_int {
@@ -69,32 +81,50 @@ pub fn is_cn_ip(address: IpAddr) -> bool {
     check_iso_code(address, "CN")
 }
 
-fn try_get_lanip_addr(
+async fn try_get_lanip_addr(
     sockaddr_unspec: SocketAddr,
     sockaddr_broadcast: SocketAddr,
-) -> Option<String> {
-    if let Ok(udp_sock) = UdpSocket::bind(sockaddr_unspec) {
-        if let Ok(()) = udp_sock.connect(sockaddr_broadcast) {
-            if let Ok(addr) = udp_sock.local_addr() {
-                return Some(addr.ip().to_string());
-            }
-        }
-    }
-    None
+) -> Result<String> {
+    let udp_sock = UdpSocket::bind(sockaddr_unspec).await?;
+    udp_sock.connect(sockaddr_broadcast).await?;
+    let addr = udp_sock.local_addr()?;
+    Ok(addr.ip().to_string())
 }
 
 #[inline]
-pub fn what_is_my_lanip_v6addr() -> Option<String> {
+pub async fn what_is_my_lanip_v6addr() -> Result<String> {
     let sockaddr_unspec = SocketAddr::new(IpAddr::V6(Ipv6Addr::UNSPECIFIED), 0);
     let sockaddr_broadcast = SocketAddr::new(IpAddr::V6(Ipv4Addr::BROADCAST.to_ipv6_mapped()), 1);
-    return try_get_lanip_addr(sockaddr_unspec, sockaddr_broadcast);
+    return try_get_lanip_addr(sockaddr_unspec, sockaddr_broadcast).await;
 }
 
 #[inline]
-pub fn what_is_my_lanip_v4addr() -> Option<String> {
+pub async fn what_is_my_lanip_v4addr() -> Result<String> {
     let sockaddr_unspec = SocketAddr::new(IpAddr::V4(Ipv4Addr::UNSPECIFIED), 0);
     let sockaddr_broadcast = SocketAddr::new(IpAddr::V4(Ipv4Addr::BROADCAST), 1);
-    return try_get_lanip_addr(sockaddr_unspec, sockaddr_broadcast);
+    return try_get_lanip_addr(sockaddr_unspec, sockaddr_broadcast).await;
+}
+
+async fn try_get_extip_addr(
+    sockaddr_unspec: SocketAddr,
+    sockaddr_stun: SocketAddr,
+) -> std::result::Result<String, Box<dyn Error>> {
+    let udp_sock = UdpSocket::bind(sockaddr_unspec).await?;
+    let external_addr =
+        StunClient::new(sockaddr_stun).query_external_address_async(&udp_sock).await?;
+    Ok(external_addr.ip().to_string())
+}
+
+#[inline]
+pub async fn what_is_my_extip_v6addr() -> std::result::Result<String, Box<dyn Error>> {
+    let sockaddr_unspec = SocketAddr::new(IpAddr::V6(Ipv6Addr::UNSPECIFIED), 0);
+    return try_get_extip_addr(sockaddr_unspec, *SOCKET_ADDR_V6_STUN).await;
+}
+
+#[inline]
+pub async fn what_is_my_extip_v4addr() -> std::result::Result<String, Box<dyn Error>> {
+    let sockaddr_unspec = SocketAddr::new(IpAddr::V4(Ipv4Addr::UNSPECIFIED), 0);
+    return try_get_extip_addr(sockaddr_unspec, *SOCKET_ADDR_V4_STUN).await;
 }
 
 #[macro_export(local_inner_macros)]

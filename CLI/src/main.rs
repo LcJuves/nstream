@@ -2,8 +2,10 @@ mod cmd;
 
 use core::net::{Ipv6Addr, SocketAddr};
 use std::error::Error;
+use std::net::{Ipv4Addr, SocketAddrV6};
 use std::sync::Arc;
 
+use advanced_random_string::{charset, random_string};
 use socks5::protocol::{
     Address, AuthMethod, Command, HandshakeRequest, HandshakeResponse, ReplyField, ReplyResponse,
     TellRequest, UdpPacket,
@@ -15,18 +17,25 @@ use tokio::net::{TcpListener, TcpStream};
 use tokio::signal;
 use tokio::sync::Mutex;
 
-use nstream_core::{seeval, what_is_my_lanip_v6addr};
+use nstream_core::{
+    seeval, what_is_my_extip_v4addr, what_is_my_extip_v6addr, what_is_my_lanip_v4addr,
+    what_is_my_lanip_v6addr, Tun, VTun, VTunConfig,
+};
 
 async fn register_graceful_shutdown() {
+    let close_socks5_proxy_and_exit = || {
+        crate::cmd::close_socks5_proxy().unwrap();
+        std::process::exit(0)
+    };
     match signal::ctrl_c().await {
         Ok(()) => {
             println!(" (Received Ctrl + C)");
-            crate::cmd::close_socks5_proxy().unwrap();
-            std::process::exit(0);
+            close_socks5_proxy_and_exit()
         }
         Err(err) => {
             eprintln!("Unable to listen for shutdown signal: {}", err);
             // we also shut down in case of error
+            close_socks5_proxy_and_exit()
         }
     }
 }
@@ -103,12 +112,12 @@ async fn impl_udp_associate(
                     }
                 },
                 _ = wait_closed(tcp_stream) => {
-                    break Ok::<_, std::io::Error>(());
+                    break Ok::<_, std::io::Error>(())
                 }
             };
         };
         if let err @ Err(_) = _ret {
-            udp_associate_ret = err;
+            udp_associate_ret = err
         }
     }
 
@@ -118,20 +127,41 @@ async fn impl_udp_associate(
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    tokio::spawn(async {
-        register_graceful_shutdown().await;
-    });
+    tokio::spawn(async { register_graceful_shutdown().await });
 
-    let usr = Arc::new("aaa".to_string());
-    let pwd = Arc::new("bbb".to_string());
-    let my_lanip_v6addr = what_is_my_lanip_v6addr().unwrap_or(Ipv6Addr::LOCALHOST.to_string());
+    let usr = Arc::new(random_string::generate(10, charset::BASE62));
+    let pwd = Arc::new(random_string::generate(10, charset::BASE62));
+
+    let my_extip_v6addr = what_is_my_extip_v6addr().await?;
+    seeval!(my_extip_v6addr);
+    let my_extip_v4addr = what_is_my_extip_v4addr().await?;
+    seeval!(my_extip_v4addr);
+
+    let my_lanip_v6addr =
+        what_is_my_lanip_v6addr().await.unwrap_or(Ipv6Addr::LOCALHOST.to_string());
     seeval!(my_lanip_v6addr);
+    let my_lanip_v4addr =
+        what_is_my_lanip_v4addr().await.unwrap_or(Ipv4Addr::LOCALHOST.to_string());
+    seeval!(my_lanip_v4addr);
 
     crate::cmd::close_socks5_proxy()?;
-    crate::cmd::open_socks5_proxy(&my_lanip_v6addr, &usr, &pwd)?;
-    let tcp_listener =
-        TcpListener::bind(format!("[{}]:{}", &my_lanip_v6addr, crate::cmd::SOCKS5_PROXY_HOST_PORT))
-            .await?;
+
+    let socks5_proxy_bind_addr =
+        SocketAddr::V6(SocketAddrV6::new((&my_lanip_v6addr).parse::<Ipv6Addr>().unwrap(), 0, 0, 0));
+    let tcp_listener = TcpListener::bind(socks5_proxy_bind_addr).await?;
+    let socks5_proxy_bind_addr = tcp_listener.local_addr()?;
+    crate::cmd::open_socks5_proxy(socks5_proxy_bind_addr, &usr, &pwd)?;
+    let vtun = VTun::new();
+    let vtun_config = VTunConfig {
+        mtu: Some(2000),
+        ipv4_addr: Some(Ipv4Addr::new(192, 168, 31, u8::MAX - 1)),
+        ipv6_addr: Some(format!("::ffff:192.168.31.{}", u8::MAX - 1).parse::<Ipv6Addr>().unwrap()),
+        netmask: Some(0xffffff00),
+    };
+    vtun.config_with(vtun_config)?;
+    seeval!(vtun.ifname());
+    seeval!(vtun.ifindex());
+    seeval!(vtun.mtu());
 
     while let Ok((mut tcp_stream, _)) = tcp_listener.accept().await {
         let _usr = usr.clone();
@@ -141,7 +171,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let hreq = HandshakeRequest::from(&mut tcp_stream).await?;
             seeval!(&hreq);
             if hreq.methods().contains(&AuthMethod::NoAuthenticationRequired) {
-                // println!("{:?}", hreq);
+                // seeval!(hreq);
             }
             let hresp = HandshakeResponse::new(AuthMethod::NoAuthenticationRequired);
             seeval!(&hresp);

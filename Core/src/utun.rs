@@ -224,7 +224,7 @@ impl Tun for UTun {
             return Err(Error::last_os_error());
         }
 
-        let VTunConfig { mtu, ipv4, ipv6, netmask } = conf;
+        let VTunConfig { mtu, ipv4_addr, ipv6_addr, netmask } = conf;
         let mut ifreq = unsafe { zeroed::<ifreq>() };
         let cstring_ifname = CString::new(self.ifname()?.as_str());
         let self_ifname_c_ptr = cstring_ifname.unwrap().into_raw();
@@ -249,10 +249,10 @@ impl Tun for UTun {
             return Err(Error::last_os_error());
         }
 
-        if let Some(ipv4) = ipv4 {
+        if let Some(ipv4_addr) = ipv4_addr {
             let mut sin = unsafe { zeroed::<sockaddr_in>() };
             sin.sin_family = AF_INET as sa_family_t;
-            sin.sin_addr.s_addr = u32::from_ne_bytes(ipv4.octets()) as in_addr_t;
+            sin.sin_addr.s_addr = u32::from_ne_bytes(ipv4_addr.octets()) as in_addr_t;
 
             ifreq.ifr_ifru.ifru_addr = unsafe { transmute::<sockaddr_in, sockaddr>(sin) };
             if unsafe { ioctl(sockfd, SIOCSIFADDR, &mut ifreq) } < 0 {
@@ -261,17 +261,9 @@ impl Tun for UTun {
             }
         }
 
-        if let Some(_ipv6) = ipv6 {
+        if let Some(_ipv6_addr) = ipv6_addr {
+            #[cfg(not(debug_assertions))]
             todo!("IPV6 support for utunX device")
-            /* let mut sin6 = unsafe { zeroed::<sockaddr_in6>() };
-            sin6.sin6_family = AF_INET6 as sa_family_t;
-            sin6.sin6_addr.s6_addr = ipv6.octets();
-
-            ifreq.ifr_ifru.ifru_addr = unsafe { transmute_copy::<sockaddr_in6, sockaddr>(&sin6) };
-            if unsafe { ioctl(sockfd, SIOCSIFADDR, &mut ifreq) } < 0 {
-                unsafe { close(sockfd) };
-                return Err(Error::last_os_error());
-            } */
         }
 
         if let Some(netmask) = netmask {

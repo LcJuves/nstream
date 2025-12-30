@@ -9,6 +9,9 @@ edition = "2024"
 libc = "0.2.138"
 maxminddb = "0.27.1"
 lazy_static = "1.4.0"
+stunclient = "0.4.2"
+tokio = "1.23.0"
+# socket2 = "0.6.1"
 
 [build-dependencies]
 cc = "1.0"

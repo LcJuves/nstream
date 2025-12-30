@@ -2,14 +2,15 @@ use std::path::Path;
 use std::{error::Error, fs::File, io::Write};
 
 use hyper::{
-    body::{Buf, HttpBody},
     Body, Client, Method, Request, Response,
+    body::{Buf, HttpBody},
 };
 use hyper_tls::HttpsConnector;
 use serde_json::Value;
 
 async fn get(url: &str) -> Result<Response<Body>, Box<dyn Error>> {
-    let req_builder = Request::builder().method(Method::GET).header("User-Agent", "rust").uri(url);
+    let req_builder =
+        Request::builder().method(Method::GET).header("User-Agent", "NStream").uri(url);
     let client = Client::builder().build::<_, Body>(HttpsConnector::new());
     let req = req_builder.body(Body::empty())?;
     Ok(client.request(req).await?)
@@ -33,8 +34,8 @@ async fn download_maxmind_mmdb() -> Result<(), Box<dyn Error>> {
                 if !*prerelease {
                     let asset0 = &item["assets"].as_array().unwrap()[0];
                     let dbname = &asset0["name"].as_str().unwrap();
-                    let db_fpath = Path::new(dbname);
-                    if !db_fpath.exists() {
+                    let db_path = Path::new(dbname);
+                    if !db_path.exists() {
                         let browser_download_url =
                             &asset0["browser_download_url"].as_str().unwrap();
                         let resp = get(browser_download_url).await?;
